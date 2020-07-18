@@ -7,19 +7,21 @@
 	xmlns:p="http://primefaces.org/ui" template="/template/template.xhtml">
 
 <h:panelGroup>
-	<h:form>
+	<h:form >
 		<h:outputText value="Bonjour #{personneController.nom}" /><br/>
 	<p:growl id="messages" showDetail="true" />
 
-	Single file<br />
+		<h:commandLink value="Déconnexion"
+					   action="#{personneController.doLogout()}" />
+	</h:form>
 	<h:form enctype="multipart/form-data">
+		Single file<br />
+
 		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
 		<br />
 		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}" disabled="false" /><br/>
-		<h:commandLink value="Déconnexion"
-			action="#{personneController.doLogout()}" />
 
-	</h:form>
+
 	</h:form>
 </h:panelGroup>
 

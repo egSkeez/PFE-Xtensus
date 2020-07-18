@@ -25,16 +25,23 @@ import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.CapabilityAcl;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.ocpsoft.rewrite.annotation.Join;
 import org.ocpsoft.rewrite.el.ELBeanName;
 import org.primefaces.model.UploadedFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import tn.xtensus.entities.Doc;
+import tn.xtensus.repository.DocRepository;
+import tn.xtensus.service.IDocService;
 
 @Scope(value = "session")
 @Component(value = "documentController")
 @ELBeanName(value = "documentController")
+//@Join(path = "/", to = "/welcome.jsf")
 public class DocumentController extends LocalConfig implements IDocumentController{
+    @Autowired
+    IDocService iDocService;
     private UploadedFile file;
     public void uploadFile() throws IOException {
         LocalConfig prem = new LocalConfig();
@@ -49,7 +56,8 @@ public class DocumentController extends LocalConfig implements IDocumentControll
     	/*  HashMap<String, String> newFolderProps = new HashMap<String, String>();
     	    newFolderProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
     	    newFolderProps.put(PropertyIds.NAME, "Courrier");
-    	    Folder folderAssociations = ((Folder) session.getObjectByPath("/Espaces Utilisateurs/motaz")).createFolder(newFolderProps); */
+    	    Folder folderAssociations = ((Folder) session.getObjectByPath("/Espaces Utilisateurs/motaz"))
+    	    .createFolder(newFolderProps); */
 
             HashMap<String, Object> newFileProps = new HashMap<String, Object>();
             ContentStream contentStream = new ContentStreamImpl(file.getFileName(), null,
@@ -65,7 +73,8 @@ public class DocumentController extends LocalConfig implements IDocumentControll
             Ace aceIn = ((Session) session).getObjectFactory().createAce(principal, permissions);
             List<Ace> aceListIn = new ArrayList<Ace>();
             aceListIn.add(aceIn);
-            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps, contentStream,
+            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps,
+                    contentStream,
                     VersioningState.MAJOR);
             testDoc.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
 
@@ -113,30 +122,32 @@ public class DocumentController extends LocalConfig implements IDocumentControll
 
     }
 
-    @Override
+
     public String save() {
-        return IDocumentController
+        return iDocService.save();
     }
 
-    @Override
+
     public Doc getDocument() {
-        return null;
+       return iDocService.getDoc();
     }
 
-    @Override
+
     public String delete(int id) {
-        return null;
+
+        return iDocService.delete(id);
     }
 
-    @Override
-    public String modifier(Doc p, String name, String alfrescoId) {
-        return null;
+    public void loadData() {
+        iDocService.loadData();
+
     }
 
-    @Override
-    public String saveModif() {
-        return null;
+
+    public List<Doc> getDocs() {
+        return iDocService.getDocs();
     }
+
 
     public UploadedFile getFile() {
         return file;

@@ -115,7 +115,7 @@ public class PersonneController implements IPersonneController{
                 testDoc.refresh();
                 Doc doc = new Doc();
                 doc.setAlfrescoId(testDoc.getId());
-                doc.setExpediteur(nom);
+               // doc.setExpediteur(nom);
                 doc.setNom(testDoc.getName());
 
 

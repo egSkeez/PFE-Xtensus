@@ -11,7 +11,8 @@ public class Doc implements Serializable {
     private int id;
     private String alfrescoId;
     private String nom;
-    private String expediteur;
+    @ManyToOne
+    private Personne expediteur;
 
     public Doc() {
     }
@@ -46,11 +47,11 @@ public class Doc implements Serializable {
         this.nom = nom;
     }
 
-    public String getExpediteur() {
+    public Personne getExpediteur() {
         return expediteur;
     }
 
-    public void setExpediteur(String expediteur) {
+    public void setExpediteur(Personne expediteur) {
         this.expediteur = expediteur;
     }
 }
