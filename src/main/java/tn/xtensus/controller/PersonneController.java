@@ -19,6 +19,7 @@ import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import tn.xtensus.entities.Doc;
 import tn.xtensus.entities.Personne;
 import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
@@ -60,10 +61,7 @@ public class PersonneController implements IPersonneController{
 
 
     public void uploadFile() {
-        if (file != null) {
-            FacesMessage message = new FacesMessage("Successful", file.getFileName() + " is uploaded.");
-            FacesContext.getCurrentInstance().addMessage(null, message);
-
+        System.out.println("Upload File triggered !!!");
             LocalConfig prem = new LocalConfig();
             Session session = prem.getCmisSession();
             if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
@@ -115,9 +113,15 @@ public class PersonneController implements IPersonneController{
                 }
                 testDoc.setAcl(aces);
                 testDoc.refresh();
+                Doc doc = new Doc();
+                doc.setAlfrescoId(testDoc.getId());
+                doc.setExpediteur(nom);
+                doc.setNom(testDoc.getName());
+
+
 
             }
-        }
+
     }
 
     public String doLogout()

@@ -16,7 +16,16 @@
 				<h:inputSecret value="#{personneController.password}" />
 				<h:commandButton id="btn" value="Connexion" action="#{personneController.doLogin}" />
 			<h:message for="btn"/>
+				<h:form enctype="multipart/form-data">
+					<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
+					<br />
+					<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}" disabled="false" /><br/>
+					<h:commandLink value="Déconnexion"
+								   action="#{personneController.doLogout()}" />
+
+				</h:form>
 			</h:panelGrid>
+
 		</h:form>
 
 

@@ -29,6 +29,7 @@ import org.ocpsoft.rewrite.el.ELBeanName;
 import org.primefaces.model.UploadedFile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import tn.xtensus.entities.Doc;
 
 @Scope(value = "session")
 @Component(value = "documentController")
@@ -110,6 +111,31 @@ public class DocumentController extends LocalConfig implements IDocumentControll
     @Override
     public void createFolderStructure() {
 
+    }
+
+    @Override
+    public String save() {
+        return IDocumentController
+    }
+
+    @Override
+    public Doc getDocument() {
+        return null;
+    }
+
+    @Override
+    public String delete(int id) {
+        return null;
+    }
+
+    @Override
+    public String modifier(Doc p, String name, String alfrescoId) {
+        return null;
+    }
+
+    @Override
+    public String saveModif() {
+        return null;
     }
 
     public UploadedFile getFile() {
