@@ -15,12 +15,16 @@ import org.apache.chemistry.opencmis.commons.enums.CapabilityAcl;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.ocpsoft.rewrite.annotation.Join;
+import org.ocpsoft.rewrite.annotation.RequestAction;
+import org.ocpsoft.rewrite.faces.annotation.Deferred;
+import org.ocpsoft.rewrite.faces.annotation.IgnorePostback;
 import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import tn.xtensus.entities.Doc;
 import tn.xtensus.entities.Personne;
+import tn.xtensus.service.IDocService;
 import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
 
@@ -38,7 +42,7 @@ import java.util.Map;
 @ELBeanName(value = "personneController")
 @Join(path = "/", to = "/login.jsf")
 
-public class PersonneController implements IPersonneController{
+public class PersonneController implements IPersonneController,IDocsController{
     @Autowired
     IPersonneService iPersonneService;
     private String nom;
@@ -48,6 +52,22 @@ public class PersonneController implements IPersonneController{
     private UploadedFile file;
     private  LocalConfig prem = new LocalConfig();
     private Session session;
+    private List<Doc> docs;
+    @Autowired
+    IDocService iDocService;
+    @Deferred
+    @RequestAction
+    @IgnorePostback
+    public void loadData() {
+        System.out.println("Loading data");
+        iDocService.loadData();
+
+    }
+
+    public List<Doc> getDocs() {
+        System.out.println("Fonction getDocs()");
+        return iDocService.getDocs();
+    }
     public String doLogin(){
         System.out.println("doLogin Function triggered !");
        session = prem.getCmisSession(nom,password);

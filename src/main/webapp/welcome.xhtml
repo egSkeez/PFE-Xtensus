@@ -6,44 +6,28 @@
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui" template="/template/template.xhtml">
 
-<h:panelGroup>
-	<h:form >
-		<h:outputText value="Bonjour #{personneController.nom}" /><br/>
-	<p:growl id="messages" showDetail="true" />
-
-		<h:commandLink value="Déconnexion"
-					   action="#{personneController.doLogout()}" /><br/>
-		<h:commandLink value="upload"
-					   action="#{personneController.uploadFile()}" />
-	</h:form>
+<ui:composition >
 	<ui:define name="content">
 		<h:form id="form">
 			<p:panel header="Products List">
-				<p:dataTable id="table" var="product" value="#{productList.products}">
+				<p:dataTable id="table" var="doc" value="#{personneController.docs}">
 
 					<p:column>
 						<f:facet name="header">Name</f:facet>
-						<h:outputText value="#{product.name}" />
+						<h:outputText value="#{doc.nom}" />
 					</p:column>
 					<p:column>
 						<f:facet name="header">Price</f:facet>
-						<h:outputText value="#{product.price}">
-							<f:convertNumber type="currency" currencySymbol="$ " />
-						</h:outputText>
+						<h:outputText value="#{doc.nom}"/>
 					</p:column>
 					<p:column>
-						<p:commandButton value="Update" action="#{productController.modifier(product,product.name,product.price)}"/>
-
-
-						<p:commandButton value="Delete" action="#{productController.delete(product.id)}" />
+						<p:commandButton value="Send" action="#{personneController.sendTo(doc.alfrescoId)}" />
 					</p:column>
 				</p:dataTable>
 			</p:panel>
 		</h:form>
 	</ui:define>
-
-
-</h:panelGroup>
+</ui:composition>
 
 </html>
 
