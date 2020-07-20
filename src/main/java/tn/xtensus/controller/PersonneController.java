@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Scope(value = "session")
 @Component(value = "personneController")
@@ -45,12 +46,15 @@ public class PersonneController implements IPersonneController{
     private Personne personne;
     private Boolean loggedIn;
     private UploadedFile file;
+    private  LocalConfig prem = new LocalConfig();
+    private Session session;
     public String doLogin(){
         System.out.println("doLogin Function triggered !");
+       session = prem.getCmisSession(nom,password);
         String navigateTo = "null";
         Personne personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
         if(personne != null ){
-            navigateTo = "/welcome.xhtml?faces-redirect=true";
+            navigateTo = "/docs-list.xhtml?faces-redirect=true";
             loggedIn=true;
         } else {
             FacesMessage facesMessage =
@@ -62,13 +66,13 @@ public class PersonneController implements IPersonneController{
 
     public void uploadFile() {
         System.out.println("Upload File triggered !!!");
-            LocalConfig prem = new LocalConfig();
-            Session session = prem.getCmisSession();
-            if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
-                    .equals(CapabilityAcl.MANAGE)) {
-                System.out.println("Le GED ne supporte pas les ACL");
-            } else {
-                System.out.println("Le GED supporte les ACL");
+
+
+        if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
+                .equals(CapabilityAcl.MANAGE)) {
+            System.out.println("Le GED ne supporte pas les ACL");
+        } else {
+            System.out.println("Le GED supporte les ACL");
 
 
     	/*  HashMap<String, String> newFolderProps = new HashMap<String, String>();
@@ -76,52 +80,70 @@ public class PersonneController implements IPersonneController{
     	    newFolderProps.put(PropertyIds.NAME, "Courrier");
     	    Folder folderAssociations = ((Folder) session.getObjectByPath("/Espaces Utilisateurs/motaz")).createFolder(newFolderProps); */
 
-                HashMap<String, Object> newFileProps = new HashMap<String, Object>();
-                ContentStream contentStream = null;
-                try {
-                    contentStream = new ContentStreamImpl(file.getFileName(), null,
-                            file.getContentType(), file.getInputstream());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            HashMap<String, Object> newFileProps = new HashMap<String, Object>();
+            ContentStream contentStream = new ContentStreamImpl("permissions.txt", null,
+                    "plain/text", new ByteArrayInputStream("document facture".getBytes()));
 
 
-                //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-                newFileProps.put(PropertyIds.NAME, file.getFileName());
-                newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-                List<String> permissions = new ArrayList<String>();
-                permissions.add("cmis:all");
-                String principal = "admin";
-                Ace aceIn = ((Session) session).getObjectFactory().createAce(principal, permissions);
-                List<Ace> aceListIn = new ArrayList<Ace>();
-                aceListIn.add(aceIn);
-                Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps, contentStream,
-                        VersioningState.MAJOR);
-                testDoc.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
+            //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            newFileProps.put(PropertyIds.NAME, "Works!!!");
+            newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            List<String> permissions = new ArrayList<String>();
+            permissions.add("cmis:all");
+            String principal = nom;
+            Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+            List<Ace> aceListIn = new ArrayList<Ace>();
+            aceListIn.add(aceIn);
+            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps, contentStream,
+                    VersioningState.MAJOR);
+            testDoc.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
 
-                OperationContext operationContext = new OperationContextImpl();
-                operationContext.setIncludeAcls(true);
-                testDoc = (Document) session.getObject(testDoc, operationContext);
-                System.out.println("l'id du document est: " + testDoc.getId());
+            OperationContext operationContext = new OperationContextImpl();
+            operationContext.setIncludeAcls(true);
+            testDoc = (Document) session.getObject(testDoc, operationContext);
+            System.out.println("l'id du document est: "+testDoc.getId());
 
-                System.out.println("ACL avant la création d'un ace...");
-                Acl acl = testDoc.getAcl();
-                List<Ace> aces = acl.getAces();
-                aces.removeAll(aces);
-                for (Ace ace : aces) {
-                    System.out.println("Found ace: " + ace.getPrincipalId() + " toString " + ace.toString());
-                }
-                testDoc.setAcl(aces);
-                testDoc.refresh();
-                Doc doc = new Doc();
-                doc.setAlfrescoId(testDoc.getId());
-               // doc.setExpediteur(nom);
-                doc.setNom(testDoc.getName());
-
-
-
+            System.out.println("ACL avant la création d'un ace...");
+            Acl acl = testDoc.getAcl();
+            List<Ace> aces = acl.getAces();
+            aces.removeAll(aces);
+            for (Ace ace : aces) {
+                System.out.println("Found ace: " + ace.getPrincipalId() + " toString "+ ace.toString());
             }
+            testDoc.setAcl(aces);
+            testDoc.refresh();
 
+        }
+
+    }
+
+    public void sendTo(String docId, String intermediaire){
+        Document document = (Document)session.getObject(docId);
+
+
+        String aspectName = "P:cm:titled";
+
+        // Make sure we got a document, and then add the aspect to it
+        if (document != null) {
+            // Check that document don't already got the aspect applied
+            List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
+            if (!aspects.contains(aspectName)) {
+                aspects.add(aspectName);
+
+                Map<String, Object> properties = new HashMap<String, Object>();
+                properties.put("cmis:secondaryObjectTypeIds", aspects);
+                properties.put("cm:description", intermediaire);
+
+
+                Document updatedDocument = (Document) document.updateProperties(properties);
+
+                System.out.println("Added aspect " + aspectName + " to " );
+            } else {
+                System.out.println("Aspect " + aspectName + " is already applied to ");
+            }
+        } else {
+            System.out.println("Document is null, cannot add aspect to it!");
+        }
     }
 
     public String doLogout()
@@ -177,5 +199,21 @@ public class PersonneController implements IPersonneController{
 
     public void setFile(UploadedFile file) {
         this.file = file;
+    }
+
+    public LocalConfig getPrem() {
+        return prem;
+    }
+
+    public void setPrem(LocalConfig prem) {
+        this.prem = prem;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

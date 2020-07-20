@@ -34,14 +34,13 @@ abstract public class RemoteConfig {
 
     /**
      *
-     * @param cmisSession
      * @param parentFolderId
      * @param folderName
      * @return Folder
      *
      */
     public Folder createFolder(String parentFolderId, String folderName) {
-        Session cmisSession = getCmisSession();
+        Session cmisSession = getCmisSession("test","test");
         Folder rootFolder = (Folder) cmisSession.getObject(parentFolderId);
 
         Folder subFolder = null;
@@ -107,7 +106,7 @@ abstract public class RemoteConfig {
                                    Map<String, Object> props)
             throws FileNotFoundException {
 
-        Session cmisSession = getCmisSession();
+        Session cmisSession = getCmisSession("test","test");
 
         String fileName = file.getName();
 
@@ -165,6 +164,6 @@ abstract public class RemoteConfig {
     }
 
     abstract public String getAlfrescoAPIUrl();
-    abstract public Session getCmisSession();
+    abstract public Session getCmisSession(String username, String password);
     abstract public HttpRequestFactory getRequestFactory();
 }

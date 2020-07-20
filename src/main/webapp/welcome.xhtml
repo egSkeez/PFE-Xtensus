@@ -12,17 +12,37 @@
 	<p:growl id="messages" showDetail="true" />
 
 		<h:commandLink value="Déconnexion"
-					   action="#{personneController.doLogout()}" />
+					   action="#{personneController.doLogout()}" /><br/>
+		<h:commandLink value="upload"
+					   action="#{personneController.uploadFile()}" />
 	</h:form>
-	<h:form enctype="multipart/form-data">
-		Single file<br />
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panel header="Products List">
+				<p:dataTable id="table" var="product" value="#{productList.products}">
 
-		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
-		<br />
-		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}" disabled="false" /><br/>
+					<p:column>
+						<f:facet name="header">Name</f:facet>
+						<h:outputText value="#{product.name}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">Price</f:facet>
+						<h:outputText value="#{product.price}">
+							<f:convertNumber type="currency" currencySymbol="$ " />
+						</h:outputText>
+					</p:column>
+					<p:column>
+						<p:commandButton value="Update" action="#{productController.modifier(product,product.name,product.price)}"/>
 
 
-	</h:form>
+						<p:commandButton value="Delete" action="#{productController.delete(product.id)}" />
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+		</h:form>
+	</ui:define>
+
+
 </h:panelGroup>
 
 </html>

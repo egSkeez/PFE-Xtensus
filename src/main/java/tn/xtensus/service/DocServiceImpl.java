@@ -1,11 +1,12 @@
 package tn.xtensus.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import tn.xtensus.entities.Doc;
 import tn.xtensus.repository.DocRepository;
 
 import java.util.List;
-
+@Service
 public class DocServiceImpl implements IDocService {
     private Doc doc = new Doc();
     private List<Doc> docs ;
@@ -18,7 +19,6 @@ public class DocServiceImpl implements IDocService {
         return "/doc-list.xhtml?faces-redirect=true";
     }
 
-    @Override
     public Doc getDoc() {
         return doc;
     }

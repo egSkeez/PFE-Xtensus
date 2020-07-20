@@ -45,7 +45,7 @@ public class DocumentController extends LocalConfig implements IDocumentControll
     private UploadedFile file;
     public void uploadFile() throws IOException {
         LocalConfig prem = new LocalConfig();
-        Session session = prem.getCmisSession();
+        Session session = prem.getCmisSession("nom","password");
         if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
                 .equals(CapabilityAcl.MANAGE)) {
             System.out.println("Le GED ne supporte pas les ACL");
