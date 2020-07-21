@@ -12,7 +12,7 @@ public class Personne implements Serializable {
     private String nom;
     private String prenom;
     private String password;
-    @OneToMany(mappedBy = "expediteur")
+    @OneToMany(mappedBy = "expediteur", fetch = FetchType.EAGER)
     private List<Doc> docs;
 
     public Personne() {

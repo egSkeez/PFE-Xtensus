@@ -29,22 +29,23 @@ import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static java.lang.Integer.getInteger;
 
 @Scope(value = "session")
 @Component(value = "personneController")
 @ELBeanName(value = "personneController")
 @Join(path = "/", to = "/login.jsf")
+@ViewScoped
+@Named("personneController")
+public class PersonneController implements IPersonneController{
 
-public class PersonneController implements IPersonneController,IDocsController{
-    @Autowired
-    IPersonneService iPersonneService;
     private String nom;
     private String password;
     private Personne personne;
@@ -53,26 +54,47 @@ public class PersonneController implements IPersonneController,IDocsController{
     private  LocalConfig prem = new LocalConfig();
     private Session session;
     private List<Doc> docs;
+    private List<Personne> people;
+    private List<Personne> filteredPeople;
     @Autowired
-    IDocService iDocService;
+    IPersonneService iPersonneService;
     @Deferred
     @RequestAction
     @IgnorePostback
-    public void loadData() {
-        System.out.println("Loading data");
-        iDocService.loadData();
+     public List<Personne> loadData() {
+        System.out.println("Loading people");
+       people = iPersonneService.loadData();
+
+       return people;
 
     }
-
-    public List<Doc> getDocs() {
-        System.out.println("Fonction getDocs()");
-        return iDocService.getDocs();
+//Filter people function
+public boolean globalFilterFunction(Object value, Object filter, Locale locale) {
+    System.out.println("globaFilterFunction started !!!");
+    String filterText = (filter == null) ? null : filter.toString().trim().toLowerCase();
+    if (filterText == null || filterText.equals("")) {
+        return true;
     }
+
+    Personne person = (Personne) value;
+    return   person.getNom().toLowerCase().contains(filterText)
+            || person.getPrenom().toLowerCase().contains(filterText);
+}
+
+    public List<Personne> getPersonnes() {
+        System.out.println("Getting people");
+        return people = iPersonneService.getPersonnes();
+    }
+
     public String doLogin(){
         System.out.println("doLogin Function triggered !");
        session = prem.getCmisSession(nom,password);
         String navigateTo = "null";
         Personne personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
+        docs = personne.getDocs();
+        for(Doc dc: docs){
+            System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
+        }
         if(personne != null ){
             navigateTo = "/docs-list.xhtml?faces-redirect=true";
             loggedIn=true;
@@ -137,6 +159,7 @@ public class PersonneController implements IPersonneController,IDocsController{
 
     }
 
+
     public void sendTo(String docId, String intermediaire){
         Document document = (Document)session.getObject(docId);
 
@@ -171,14 +194,6 @@ public class PersonneController implements IPersonneController,IDocsController{
         return "/login.xhtml?faces-redirect=true";
 
 
-    }
-
-    public IPersonneService getiPersonneService() {
-        return iPersonneService;
-    }
-
-    public void setiPersonneService(IPersonneService iPersonneService) {
-        this.iPersonneService = iPersonneService;
     }
 
     public String getNom() {
@@ -235,5 +250,30 @@ public class PersonneController implements IPersonneController,IDocsController{
 
     public void setSession(Session session) {
         this.session = session;
+    }
+
+
+    public List<Personne> getPeople() {
+        return people;
+    }
+
+    public void setPeople(List<Personne> people) {
+        this.people = people;
+    }
+
+    public List<Doc> getDocs() {
+        return docs;
+    }
+
+    public void setDocs(List<Doc> docs) {
+        this.docs = docs;
+    }
+
+    public List<Personne> getFilteredPeople() {
+        return filteredPeople;
+    }
+
+    public void setFilteredPeople(List<Personne> filteredPeople) {
+        this.filteredPeople = filteredPeople;
     }
 }

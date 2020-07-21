@@ -6,10 +6,11 @@
 	  xmlns:h="http://xmlns.jcp.org/jsf/html"
 	  xmlns:f="http://xmlns.jcp.org/jsf/core"
 	  xmlns:p="http://primefaces.org/ui">
-
+<ui:composition template="layout.xhtml">
+<ui:define name="content">
 		<h:form id="form">
 			<p:panel header="Documents List">
-				<p:dataTable id="table" var="document" value="#{docsList.docs}">
+				<p:dataTable id="table" var="document" value="#{personneController.docs}">
 
 					<p:column>
 						<f:facet name="header">Alfresco ID</f:facet>
@@ -20,11 +21,30 @@
 						<h:outputText value="#{document.nom}"/>
 
 					</p:column>
-					<p:column>
 
-					</p:column>
 				</p:dataTable>
-			</p:panel>
+			</p:panel></h:form>
+		<h:form>
+			<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
+						 emptyMessage="No cars found with given criteria" filteredValue="#{personneController.filteredPeople}">
+
+				<f:facet name="header">
+					<p:outputPanel>
+						<h:outputText value="Search all fields:" />
+						<p:inputText id="globalFilter" onkeyup="PF('peopleTable').filter()" style="width:150px" placeholder="Enter keyword"/>
+					</p:outputPanel>
+				</f:facet>
+
+				<p:column filterBy="#{personne.nom}"  footerText="contains" filterMatchMode="contains">
+					<h:outputText value="#{personne.nom}" />
+				</p:column>
+
+				<p:column headerText="Last Name" >
+					<h:outputText value="#{personne.prenom}" />
+				</p:column>
+			</p:dataTable>
 		</h:form>
+</ui:define>
+</ui:composition>
 
 </html>
