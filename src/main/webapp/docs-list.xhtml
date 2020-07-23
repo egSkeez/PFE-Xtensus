@@ -8,8 +8,14 @@
 	  xmlns:p="http://primefaces.org/ui">
 <ui:composition template="layout.xhtml">
 <ui:define name="content">
+	<h:form enctype="multipart/form-data">
+		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
+		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile()}"
+						 disabled="false" />
+	</h:form>
 		<h:form id="form">
-			<p:panel header="Documents List">
+			<p:panel header="My Documents">
+
 				<p:dataTable id="table" var="document" value="#{personneController.docs}">
 
 					<p:column>
@@ -26,16 +32,16 @@
 			</p:panel></h:form>
 		<h:form>
 			<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
-						 emptyMessage="No cars found with given criteria" filteredValue="#{personneController.filteredPeople}">
+						 emptyMessage="None found with given criteria" filteredValue="#{personneController.filteredPeople}">
 
 				<f:facet name="header">
 					<p:outputPanel>
-						<h:outputText value="Search all fields:" />
+						<h:outputText value="Search all fields " />
 						<p:inputText id="globalFilter" onkeyup="PF('peopleTable').filter()" style="width:150px" placeholder="Enter keyword"/>
 					</p:outputPanel>
 				</f:facet>
 
-				<p:column filterBy="#{personne.nom}"  footerText="contains" filterMatchMode="contains">
+				<p:column filterBy="#{personne.nom}" headerText="Name" filterMatchMode="contains" placeholder="Name">
 					<h:outputText value="#{personne.nom}" />
 				</p:column>
 

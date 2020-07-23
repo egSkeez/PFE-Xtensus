@@ -34,9 +34,12 @@ import javax.faces.context.FacesContext;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.*;
 
 import static java.lang.Integer.getInteger;
+import static java.lang.Integer.valueOf;
 
 @Scope(value = "session")
 @Component(value = "personneController")
@@ -44,7 +47,7 @@ import static java.lang.Integer.getInteger;
 @Join(path = "/", to = "/login.jsf")
 @ViewScoped
 @Named("personneController")
-public class PersonneController implements IPersonneController{
+public class PersonneController implements IPersonneController, Serializable {
 
     private String nom;
     private String password;
@@ -121,14 +124,16 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
     	    newFolderProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
     	    newFolderProps.put(PropertyIds.NAME, "Courrier");
     	    Folder folderAssociations = ((Folder) session.getObjectByPath("/Espaces Utilisateurs/motaz")).createFolder(newFolderProps); */
-
+            System.out.println("The file's name is: "+file.getFileName());
+            BigInteger bi;
+            bi = BigInteger.valueOf(file.getSize());
             HashMap<String, Object> newFileProps = new HashMap<String, Object>();
-            ContentStream contentStream = new ContentStreamImpl("permissions.txt", null,
-                    "plain/text", new ByteArrayInputStream("document facture".getBytes()));
+            ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
+                    file.getContentType(), new ByteArrayInputStream(file.getContents()));
 
 
             //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-            newFileProps.put(PropertyIds.NAME, "Works!!!");
+            newFileProps.put(PropertyIds.NAME, file.getFileName());
             newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             List<String> permissions = new ArrayList<String>();
             permissions.add("cmis:all");
@@ -136,7 +141,8 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
             List<Ace> aceListIn = new ArrayList<Ace>();
             aceListIn.add(aceIn);
-            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps, contentStream,
+            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps,
+                    contentStream,
                     VersioningState.MAJOR);
             testDoc.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
 
