@@ -15,7 +15,6 @@ public interface IDocumentController {
     public String save();
     public Doc getDocument();
     public String delete(int id);
-    public void loadData();
     public List<Doc> getDocs();
 
 }

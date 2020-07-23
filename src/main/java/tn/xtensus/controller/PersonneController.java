@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import tn.xtensus.entities.Doc;
 import tn.xtensus.entities.Personne;
+import tn.xtensus.repository.DocRepository;
 import tn.xtensus.service.IDocService;
 import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
@@ -31,6 +32,8 @@ import org.ocpsoft.rewrite.el.ELBeanName;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
+import javax.faces.model.SelectItemGroup;
 import javax.inject.Named;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -47,7 +50,7 @@ import static java.lang.Integer.valueOf;
 @Join(path = "/", to = "/login.jsf")
 @ViewScoped
 @Named("personneController")
-public class PersonneController implements IPersonneController, Serializable {
+public class PersonneController implements IPersonneController, Serializable, IDocumentController {
 
     private String nom;
     private String password;
@@ -59,6 +62,13 @@ public class PersonneController implements IPersonneController, Serializable {
     private List<Doc> docs;
     private List<Personne> people;
     private List<Personne> filteredPeople;
+    private String[] selectedRights;
+    private List<SelectItem> rights;
+    private List<Personne> recievers;
+
+
+    @Autowired
+    DocRepository docRepository;
     @Autowired
     IPersonneService iPersonneService;
     @Deferred
@@ -71,6 +81,9 @@ public class PersonneController implements IPersonneController, Serializable {
        return people;
 
     }
+    //Checkbox list
+
+
 //Filter people function
 public boolean globalFilterFunction(Object value, Object filter, Locale locale) {
     System.out.println("globaFilterFunction started !!!");
@@ -93,7 +106,7 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
         System.out.println("doLogin Function triggered !");
        session = prem.getCmisSession(nom,password);
         String navigateTo = "null";
-        Personne personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
+        personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
         docs = personne.getDocs();
         for(Doc dc: docs){
             System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
@@ -111,6 +124,7 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
 
     public void uploadFile() {
         System.out.println("Upload File triggered !!!");
+        Doc dbDoc = new Doc();
 
 
         if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
@@ -150,19 +164,57 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
             operationContext.setIncludeAcls(true);
             testDoc = (Document) session.getObject(testDoc, operationContext);
             System.out.println("l'id du document est: "+testDoc.getId());
-
-            System.out.println("ACL avant la création d'un ace...");
-            Acl acl = testDoc.getAcl();
-            List<Ace> aces = acl.getAces();
-            aces.removeAll(aces);
-            for (Ace ace : aces) {
-                System.out.println("Found ace: " + ace.getPrincipalId() + " toString "+ ace.toString());
-            }
-            testDoc.setAcl(aces);
             testDoc.refresh();
+            dbDoc.setAlfrescoId(testDoc.getId());
+            dbDoc.setNom(file.getFileName());
+            dbDoc.setExpediteur(personne);
+            docRepository.save(dbDoc);
+            System.out.println("Document added to Database !");
+
+
 
         }
 
+    }
+
+    @Override
+    public void creationDocument(String nomFichier, String owner) {
+
+    }
+
+    @Override
+    public void applyACL(String docId, String principlID, String acl) {
+
+    }
+
+    @Override
+    public void applyACLFolder(String docId, String principlID, String acl) {
+
+    }
+
+    @Override
+    public void envoyerVers(String docId, String intermediaire) {
+
+    }
+
+    @Override
+    public void createFolderStructure() {
+
+    }
+
+    @Override
+    public String save() {
+        return null;
+    }
+
+    @Override
+    public Doc getDocument() {
+        return null;
+    }
+
+    @Override
+    public String delete(int id) {
+        return null;
     }
 
 
@@ -281,5 +333,29 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
 
     public void setFilteredPeople(List<Personne> filteredPeople) {
         this.filteredPeople = filteredPeople;
+    }
+
+    public String[] getSelectedRights() {
+        return selectedRights;
+    }
+
+    public void setSelectedRights(String[] selectedRights) {
+        this.selectedRights = selectedRights;
+    }
+
+    public List<SelectItem> getRights() {
+        return rights;
+    }
+
+    public void setRights(List<SelectItem> rights) {
+        this.rights = rights;
+    }
+
+    public List<Personne> getRecievers() {
+        return recievers;
+    }
+
+    public void setRecievers(List<Personne> recievers) {
+        this.recievers = recievers;
     }
 }

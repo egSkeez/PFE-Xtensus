@@ -10,13 +10,13 @@
 <ui:define name="content">
 	<h:form enctype="multipart/form-data">
 		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
-		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile()}"
+		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}"
 						 disabled="false" />
 	</h:form>
 		<h:form id="form">
 			<p:panel header="My Documents">
 
-				<p:dataTable id="table" var="document" value="#{personneController.docs}">
+				<p:dataTable id="table" var="document" value="#{personneController.docs}" >
 
 					<p:column>
 						<f:facet name="header">Alfresco ID</f:facet>
@@ -27,12 +27,26 @@
 						<h:outputText value="#{document.nom}"/>
 
 					</p:column>
+					<p:column>
+						<f:facet name="header">Send</f:facet>
+						<h:outputText value="#{document.nom}"/>
+
+					</p:column>
 
 				</p:dataTable>
+
+				<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
+					<f:selectItem itemLabel="Read" itemValue="read" />
+					<f:selectItem itemLabel="Right" itemValue="right" />
+					<f:selectItem itemLabel="All" itemValue="all" />
+				</p:selectManyCheckbox>
+				<p:separator />
+
 			</p:panel></h:form>
+
 		<h:form>
 			<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
-						 emptyMessage="None found with given criteria" filteredValue="#{personneController.filteredPeople}">
+						 emptyMessage="None found with given criteria" filteredValue="#{personneController.filteredPeople}"  selection="#{personneConteroller.recievers}" rowKey="#{personne.id}" style="margin-bottom:0">
 
 				<f:facet name="header">
 					<p:outputPanel>
@@ -40,6 +54,7 @@
 						<p:inputText id="globalFilter" onkeyup="PF('peopleTable').filter()" style="width:150px" placeholder="Enter keyword"/>
 					</p:outputPanel>
 				</f:facet>
+				<p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
 				<p:column filterBy="#{personne.nom}" headerText="Name" filterMatchMode="contains" placeholder="Name">
 					<h:outputText value="#{personne.nom}" />
@@ -48,8 +63,11 @@
 				<p:column headerText="Last Name" >
 					<h:outputText value="#{personne.prenom}" />
 				</p:column>
+
 			</p:dataTable>
+			<p:commandButton value="Send" />
 		</h:form>
+
 </ui:define>
 </ui:composition>
 
