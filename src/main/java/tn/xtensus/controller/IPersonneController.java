@@ -10,5 +10,6 @@ public interface IPersonneController {
     public void uploadFile();
     public List<Personne> loadData();
     public List<Personne> getPersonnes();
+    public void sendTo();
 
 }

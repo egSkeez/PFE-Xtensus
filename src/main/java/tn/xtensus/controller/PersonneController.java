@@ -65,6 +65,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private String[] selectedRights;
     private List<SelectItem> rights;
     private List<Personne> recievers;
+    private List<Doc> selectedDocs;
 
 
     @Autowired
@@ -81,21 +82,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
        return people;
 
     }
-    //Checkbox list
 
-
-//Filter people function
-public boolean globalFilterFunction(Object value, Object filter, Locale locale) {
-    System.out.println("globaFilterFunction started !!!");
-    String filterText = (filter == null) ? null : filter.toString().trim().toLowerCase();
-    if (filterText == null || filterText.equals("")) {
-        return true;
-    }
-
-    Personne person = (Personne) value;
-    return   person.getNom().toLowerCase().contains(filterText)
-            || person.getPrenom().toLowerCase().contains(filterText);
-}
 
     public List<Personne> getPersonnes() {
         System.out.println("Getting people");
@@ -218,33 +205,58 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
     }
 
 
-    public void sendTo(String docId, String intermediaire){
-        Document document = (Document)session.getObject(docId);
+    public void sendTo(){
+        System.out.println("Send function started !!!!");
+        System.out.println("Recievers size: "+recievers.size());
+        System.out.println("Right number: "+selectedDocs.size());
+
+        for(Personne p: recievers) {
+            System.out.println("Treating user: "+p.getNom());
+
+            for(Doc d: selectedDocs) {
+                System.out.println("Treating document"+d.getNom());
+                List<Ace> aceListIn = new ArrayList<Ace>();
+                Document document = (Document) session.getObject(d.getAlfrescoId());
 
 
-        String aspectName = "P:cm:titled";
+                String aspectName = "P:cm:titled";
 
-        // Make sure we got a document, and then add the aspect to it
-        if (document != null) {
-            // Check that document don't already got the aspect applied
-            List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
-            if (!aspects.contains(aspectName)) {
-                aspects.add(aspectName);
+                // Make sure we got a document, and then add the aspect to it
+                if (document != null) {
+                    // Check that document don't already got the aspect applied
+                    if(Arrays.asList(selectedRights).contains("middle man"))
+                    {
+                    List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
+                    if (!aspects.contains(aspectName)) {
+                        aspects.add(aspectName);
 
-                Map<String, Object> properties = new HashMap<String, Object>();
-                properties.put("cmis:secondaryObjectTypeIds", aspects);
-                properties.put("cm:description", intermediaire);
+                        Map<String, Object> properties = new HashMap<String, Object>();
+                        properties.put("cmis:secondaryObjectTypeIds", aspects);
+                        properties.put("cm:description", p.getNom());
 
 
-                Document updatedDocument = (Document) document.updateProperties(properties);
+                        Document updatedDocument = (Document) document.updateProperties(properties);
+                    }
+                        System.out.println("Added aspect " + aspectName + " to ");
+                    } else {
+                        for(String rght: selectedRights) {
+                            List<String> permissions = new ArrayList<String>();
+                            permissions.add("cmis:" + rght);
+                            String principal = p.getNom();
+                            Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
 
-                System.out.println("Added aspect " + aspectName + " to " );
-            } else {
-                System.out.println("Aspect " + aspectName + " is already applied to ");
+                            aceListIn.add(aceIn);
+                        }
+                    }
+                    document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
+                } else {
+                    System.out.println("Document is null, cannot add aspect to it!");
+                }
+
             }
-        } else {
-            System.out.println("Document is null, cannot add aspect to it!");
         }
+
+
     }
 
     public String doLogout()
@@ -357,5 +369,13 @@ public boolean globalFilterFunction(Object value, Object filter, Locale locale) 
 
     public void setRecievers(List<Personne> recievers) {
         this.recievers = recievers;
+    }
+
+    public List<Doc> getSelectedDocs() {
+        return selectedDocs;
+    }
+
+    public void setSelectedDocs(List<Doc> selectedDocs) {
+        this.selectedDocs = selectedDocs;
     }
 }
