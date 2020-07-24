@@ -7,6 +7,7 @@ import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.Acl;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
@@ -66,6 +67,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<SelectItem> rights;
     private List<Personne> recievers;
     private List<Doc> selectedDocs;
+    private Boolean loggedin = false;
 
 
     @Autowired
@@ -90,8 +92,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
     }
 
     public String doLogin(){
-        System.out.println("doLogin Function triggered !");
+        System.out.println("######################### doLogin Function triggered #########################");
+        System.out.println("User signed up: "+nom);
        session = prem.getCmisSession(nom,password);
+        session.getDefaultContext().setCacheEnabled(false);
+        loggedIn = true;
+        System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
+
         String navigateTo = "null";
         personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
         docs = personne.getDocs();
@@ -110,7 +117,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
 
     public void uploadFile() {
-        System.out.println("Upload File triggered !!!");
+        System.out.println("######################### Upload File triggered #########################");
         Doc dbDoc = new Doc();
 
 
@@ -120,11 +127,6 @@ public class PersonneController implements IPersonneController, Serializable, ID
         } else {
             System.out.println("Le GED supporte les ACL");
 
-
-    	/*  HashMap<String, String> newFolderProps = new HashMap<String, String>();
-    	    newFolderProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
-    	    newFolderProps.put(PropertyIds.NAME, "Courrier");
-    	    Folder folderAssociations = ((Folder) session.getObjectByPath("/Espaces Utilisateurs/motaz")).createFolder(newFolderProps); */
             System.out.println("The file's name is: "+file.getFileName());
             BigInteger bi;
             bi = BigInteger.valueOf(file.getSize());
@@ -206,61 +208,72 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
 
     public void sendTo(){
-        System.out.println("Send function started !!!!");
+        System.out.println("######################### Send function started #########################");
         System.out.println("Recievers size: "+recievers.size());
-        System.out.println("Right number: "+selectedDocs.size());
+        System.out.println("Documents selected: "+selectedDocs.size());
+        System.out.println("Number of rights selected: "+Arrays.asList(selectedRights).size());
 
-        for(Personne p: recievers) {
-            System.out.println("Treating user: "+p.getNom());
+        for(int i=0;i<recievers.size();i++) {
+            System.out.println("Treating user: "+recievers.get(i).getNom());
 
             for(Doc d: selectedDocs) {
-                System.out.println("Treating document"+d.getNom());
+                System.out.println("Treating document: "+d.getNom());
                 List<Ace> aceListIn = new ArrayList<Ace>();
                 Document document = (Document) session.getObject(d.getAlfrescoId());
 
 
                 String aspectName = "P:cm:titled";
 
-                // Make sure we got a document, and then add the aspect to it
-                if (document != null) {
                     // Check that document don't already got the aspect applied
                     if(Arrays.asList(selectedRights).contains("middle man"))
                     {
+                        System.out.println("Treating middle man!");
                     List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
-                    if (!aspects.contains(aspectName)) {
+
                         aspects.add(aspectName);
 
                         Map<String, Object> properties = new HashMap<String, Object>();
                         properties.put("cmis:secondaryObjectTypeIds", aspects);
-                        properties.put("cm:description", p.getNom());
+                        properties.put("cm:description", recievers.get(i).getNom());
+                        List<String> permission = new ArrayList<String>();
+                        permission.add("cmis:all");
+                        String principal = recievers.get(i).getNom();
+                        Ace aceIn = session.getObjectFactory().createAce(principal, permission);
 
+                        aceListIn.add(aceIn);
 
-                        Document updatedDocument = (Document) document.updateProperties(properties);
-                    }
-                        System.out.println("Added aspect " + aspectName + " to ");
+                        document.updateProperties(properties);
+
+                        System.out.println("Gave "+recievers.get(i).getNom()+" all the rights!");
                     } else {
                         for(String rght: selectedRights) {
+                            System.out.println("Treating right: "+rght);
                             List<String> permissions = new ArrayList<String>();
+                            if(rght.equals("write"))
                             permissions.add("cmis:" + rght);
-                            String principal = p.getNom();
+                            String principal = recievers.get(i).getNom();
                             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
 
                             aceListIn.add(aceIn);
                         }
                     }
                     document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
-                } else {
-                    System.out.println("Document is null, cannot add aspect to it!");
-                }
+
 
             }
+            System.out.println("Done with the the iteration number: ");
         }
-
 
     }
 
     public String doLogout()
-    {FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+    {  System.out.println("######################### Logout Function #########################");
+        //this.session.clear();
+        loggedIn = false;
+        System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
+        FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
+
+
         return "/login.xhtml?faces-redirect=true";
 
 
@@ -377,5 +390,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setSelectedDocs(List<Doc> selectedDocs) {
         this.selectedDocs = selectedDocs;
+    }
+
+    public Boolean getLoggedin() {
+        return loggedin;
+    }
+
+    public void setLoggedin(Boolean loggedin) {
+        this.loggedin = loggedin;
     }
 }

@@ -8,58 +8,67 @@
 	  xmlns:p="http://primefaces.org/ui">
 <ui:composition template="layout.xhtml">
 <ui:define name="content">
-	<h:form enctype="multipart/form-data">
+
+	<h:form enctype="multipart/form-data" id="uploadform">
+		<p:commandButton id="btn" value="Logout" action="#{personneController.doLogout}" />
 		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
 		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}"
 						 disabled="false" />
-	</h:form>
-		<h:form id="form">
-			<p:panel header="My Documents">
 
-				<p:dataTable id="table" var="document" value="#{personneController.docs}" selectionMode="multiple" selection="#{personneController.selectedDocs}" rowKey="#{document.id}" >
+		<p:panel header="My Documents">
 
-					<p:column>
-						<f:facet name="header">Alfresco ID</f:facet>
-						<h:outputText value="#{document.alfrescoId}" />
-					</p:column>
-					<p:column>
-						<f:facet name="header">Name</f:facet>
-						<h:outputText value="#{document.nom}"/>
-
-					</p:column>
-
-				</p:dataTable>
-
-				<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
-					<f:selectItem itemLabel="Read" itemValue="read" />
-					<f:selectItem itemLabel="Right" itemValue="right" />
-					<f:selectItem itemLabel="All" itemValue="all" />
-				</p:selectManyCheckbox>
-				<p:separator />
-
-			</p:panel></h:form>
-
-		<h:form>
-			<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
-						 emptyMessage="None found with given criteria"
-						 filteredValue="#{personneController.filteredPeople}"
+			<p:dataTable id="table" var="document" value="#{personneController.docs}"
 						 selectionMode="multiple"
-						 selection="#{personneConteroller.recievers}"
-						 rowKey="#{personne.id}" >
-				<p:column filterBy="#{personne.nom}"
-						  headerText="Name"
-						  filterMatchMode="contains"
-						  placeholder="Name">
-					<h:outputText value="#{personne.nom}" />
-				</p:column>
+						 selection="#{personneController.selectedDocs}"
+						 rowKey="#{document.alfrescoId}" >
 
-				<p:column headerText="Last Name" >
-					<h:outputText value="#{personne.prenom}" />
+				<p:column>
+					<f:facet name="header">Alfresco ID</f:facet>
+					<h:outputText value="#{document.alfrescoId}" />
+				</p:column>
+				<p:column>
+					<f:facet name="header">Name</f:facet>
+					<h:outputText value="#{document.nom}"/>
+
 				</p:column>
 
 			</p:dataTable>
-		</h:form>
-	<p:commandButton value="Send"  type="submit" action="#{personneController.sendTo}"/>
+
+
+			<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
+				<f:selectItem itemLabel="Read" itemValue="read" />
+				<f:selectItem itemLabel="Write" itemValue="write" />
+				<f:selectItem itemLabel="All" itemValue="all" />
+				<f:selectItem itemLabel="Middle man" itemValue="middle man" />
+			</p:selectManyCheckbox>
+			<p:separator />
+
+		</p:panel>
+
+
+		<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
+					 emptyMessage="None found with given criteria"
+					 filteredValue="#{personneController.filteredPeople}"
+					 selectionMode="multiple"
+					 selection="#{personneController.recievers}"
+					 rowKey="#{personne.id}" >
+			<p:column headerText="Id" style="width:20px;">
+				<h:outputText value="#{personne.id}" />
+			</p:column>
+			<p:column filterBy="#{personne.nom}"
+					  headerText="Name"
+					  filterMatchMode="contains"
+					  placeholder="Name">
+				<h:outputText value="#{personne.nom}" />
+			</p:column>
+
+			<p:column headerText="Last Name" >
+				<h:outputText value="#{personne.prenom}" />
+			</p:column>
+		</p:dataTable>
+		<p:commandButton value="Send" action="#{personneController.sendTo}" />
+	</h:form>
+
 </ui:define>
 </ui:composition>
 

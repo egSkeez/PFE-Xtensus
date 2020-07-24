@@ -208,8 +208,8 @@ public class LocalConfig {
             parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/alfresco/api/-default-/public/cmis/versions/1.1/atom");
             parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
             parameter.put(SessionParameter.AUTH_HTTP_BASIC, "true");
-            parameter.put(SessionParameter.USER, "motaz");
-            parameter.put(SessionParameter.PASSWORD, "motaz");
+            parameter.put(SessionParameter.USER, username);
+            parameter.put(SessionParameter.PASSWORD, password);
             //parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 
             List<Repository> repositories = factory.getRepositories(parameter);
