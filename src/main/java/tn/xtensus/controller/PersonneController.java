@@ -32,13 +32,13 @@ import org.ocpsoft.rewrite.el.ELBeanName;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 import javax.inject.Named;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -201,9 +201,15 @@ public class PersonneController implements IPersonneController, Serializable, ID
         return null;
     }
 
-    @Override
-    public String delete(int id) {
-        return null;
+    public String delete() {
+        System.out.println("######################### Delete function started #########################");
+        for(Doc dc: selectedDocs){
+        docRepository.delete(dc);
+        Document doc =(Document) session.getObject(dc.getAlfrescoId());
+        doc.delete();
+        docs.remove(dc);
+        }
+        return "?faces-redirect=true";
     }
 
 
@@ -264,6 +270,32 @@ public class PersonneController implements IPersonneController, Serializable, ID
             System.out.println("Done with the the iteration number: ");
         }
 
+    }
+    public void downloadDocument()
+    {
+        System.out.println("######################### Download Function #########################");
+        for(Doc dc: selectedDocs) {
+            Document newDocument = (Document) session.getObject(dc.getAlfrescoId());
+            System.out.println(newDocument.getId());
+            try {
+                ContentStream cs = newDocument.getContentStream(null);
+                BufferedInputStream in = new BufferedInputStream(cs.getStream());
+                String home = System.getProperty("user.home");
+              //  File file = new File(home+"/Downloads/" + fileName + ".txt");
+                FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + dc.getNom() + ".txt");
+                OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
+                byte[] buf = new byte[1024];
+                int n = 0;
+                while ((n = in.read(buf)) > 0) {
+                    bufferedOutputStream.write(buf, 0, n);
+                }
+                bufferedOutputStream.close();
+                fos.close();
+                in.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getLocalizedMessage());
+            }
+        }
     }
 
     public String doLogout()

@@ -14,7 +14,7 @@ public interface IDocumentController {
     public void createFolderStructure();
     public String save();
     public Doc getDocument();
-    public String delete(int id);
+    public String delete();
     public List<Doc> getDocs();
 
 }

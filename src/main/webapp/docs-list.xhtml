@@ -43,7 +43,10 @@
 			</p:selectManyCheckbox>
 			<p:separator />
 
-		</p:panel>
+			<p:commandButton value="Delete" action="#{personneController.delete}" update="table" />
+			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down">
+		</p:commandButton>
+	</p:panel>
 
 
 		<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"

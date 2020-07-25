@@ -132,6 +132,11 @@ public class DocumentController extends LocalConfig implements IDocumentControll
        return iDocService.getDoc();
     }
 
+    @Override
+    public String delete() {
+        return null;
+    }
+
 
     public String delete(int id) {
 
