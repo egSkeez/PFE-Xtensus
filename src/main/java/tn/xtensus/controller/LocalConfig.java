@@ -199,7 +199,7 @@ public class LocalConfig {
      * @return Session
      */
     public Session getCmisSession(String username,String password) {
-        if (cmisSession == null) {
+        if (cmisSession == null || !cmisSession.getSessionParameters().get(SessionParameter.USER).equals(username)) {
             // default factory implementation
             SessionFactory factory = SessionFactoryImpl.newInstance();
             Map<String, String> parameter = new HashMap<String, String>();

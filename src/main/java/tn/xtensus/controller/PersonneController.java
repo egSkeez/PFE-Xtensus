@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import tn.xtensus.entities.Doc;
 import tn.xtensus.entities.Personne;
 import tn.xtensus.repository.DocRepository;
+import tn.xtensus.repository.PersonneRepository;
 import tn.xtensus.service.IDocService;
 import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
@@ -68,8 +69,10 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Personne> recievers;
     private List<Doc> selectedDocs;
     private Boolean loggedin = false;
-
-
+    private Set<Doc> inbox;
+    private List<Doc> selectedInbox;
+    @Autowired
+    PersonneRepository personneRepository;
     @Autowired
     DocRepository docRepository;
     @Autowired
@@ -102,6 +105,8 @@ public class PersonneController implements IPersonneController, Serializable, ID
         String navigateTo = "null";
         personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
         docs = personne.getDocs();
+        inbox = personne.getInbox();
+        System.out.println("Inbox size: "+inbox.size());
         for(Doc dc: docs){
             System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
         }
@@ -209,7 +214,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         doc.delete();
         docs.remove(dc);
         }
-        return "?faces-redirect=true";
+        return "/docs-list.xhtml?faces-redirect=true";
     }
 
 
@@ -223,11 +228,10 @@ public class PersonneController implements IPersonneController, Serializable, ID
             System.out.println("Treating user: "+recievers.get(i).getNom());
 
             for(Doc d: selectedDocs) {
+
                 System.out.println("Treating document: "+d.getNom());
                 List<Ace> aceListIn = new ArrayList<Ace>();
                 Document document = (Document) session.getObject(d.getAlfrescoId());
-
-
                 String aspectName = "P:cm:titled";
 
                     // Check that document don't already got the aspect applied
@@ -253,18 +257,21 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         System.out.println("Gave "+recievers.get(i).getNom()+" all the rights!");
                     } else {
                         for(String rght: selectedRights) {
-                            System.out.println("Treating right: "+rght);
+
                             List<String> permissions = new ArrayList<String>();
                             if(rght.equals("write"))
                             permissions.add("cmis:" + rght);
                             String principal = recievers.get(i).getNom();
                             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
-
                             aceListIn.add(aceIn);
+                            System.out.println("Treated right: "+rght);
                         }
                     }
                     document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
-
+               /* d.getDestinations().add(recievers.get(i));
+                recievers.get(i).getInbox().add(d);
+                personneRepository.save(recievers.get(i));
+                docRepository.save(d); */
 
             }
             System.out.println("Done with the the iteration number: ");
@@ -430,5 +437,21 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setLoggedin(Boolean loggedin) {
         this.loggedin = loggedin;
+    }
+
+    public Set<Doc> getInbox() {
+        return inbox;
+    }
+
+    public void setInbox(Set<Doc> inbox) {
+        this.inbox = inbox;
+    }
+
+    public List<Doc> getSelectedInbox() {
+        return selectedInbox;
+    }
+
+    public void setSelectedInbox(List<Doc> selectedInbox) {
+        this.selectedInbox = selectedInbox;
     }
 }

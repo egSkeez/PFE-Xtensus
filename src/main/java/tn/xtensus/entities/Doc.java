@@ -2,6 +2,8 @@ package tn.xtensus.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "documents")
@@ -13,6 +15,8 @@ public class Doc implements Serializable {
     private String nom;
     @ManyToOne
     private Personne expediteur;
+    @ManyToMany(mappedBy = "inbox")
+    private Set<Personne> destinations;
 
     public Doc() {
     }
@@ -53,5 +57,13 @@ public class Doc implements Serializable {
 
     public void setExpediteur(Personne expediteur) {
         this.expediteur = expediteur;
+    }
+
+    public Set<Personne> getDestinations() {
+        return destinations;
+    }
+
+    public void setDestinations(Set<Personne> destinations) {
+        this.destinations = destinations;
     }
 }

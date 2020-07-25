@@ -33,6 +33,22 @@
 				</p:column>
 
 			</p:dataTable>
+			<p:dataTable id="table1" var="doc" value="#{personneController.inbox}"
+						 selectionMode="multiple"
+						 selection="#{personneController.selectedInbox}"
+						 rowKey="#{doc.alfrescoId}" >
+
+				<p:column>
+					<f:facet name="header">Alfresco ID</f:facet>
+					<h:outputText value="#{doc.alfrescoId}" />
+				</p:column>
+				<p:column>
+					<f:facet name="header">Name</f:facet>
+					<h:outputText value="#{document.nom}"/>
+
+				</p:column>
+
+			</p:dataTable>
 
 
 			<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
