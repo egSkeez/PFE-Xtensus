@@ -2,6 +2,7 @@ package tn.xtensus.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,15 +14,10 @@ public class Personne implements Serializable {
     private String nom;
     private String prenom;
     private String password;
-    @OneToMany(mappedBy = "expediteur", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Doc> docs;
-    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER)
-    @JoinTable(
-            name = "person_doc",
-            joinColumns = { @JoinColumn(name = "person_id") },
-            inverseJoinColumns = { @JoinColumn(name = "doc_id") }
-    )
-    private Set<Doc> inbox;
+    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "destinations")
+    private Set<Doc> inbox = new HashSet<>();
 
     public Personne() {
     }

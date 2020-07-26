@@ -229,9 +229,10 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
             for(Doc d: selectedDocs) {
 
-                System.out.println("Treating document: "+d.getNom());
+
                 List<Ace> aceListIn = new ArrayList<Ace>();
                 Document document = (Document) session.getObject(d.getAlfrescoId());
+                System.out.println("Treating document: "+document.getName());
                 String aspectName = "P:cm:titled";
 
                     // Check that document don't already got the aspect applied
@@ -259,7 +260,6 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         for(String rght: selectedRights) {
 
                             List<String> permissions = new ArrayList<String>();
-                            if(rght.equals("write"))
                             permissions.add("cmis:" + rght);
                             String principal = recievers.get(i).getNom();
                             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
@@ -268,13 +268,16 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         }
                     }
                     document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
-               /* d.getDestinations().add(recievers.get(i));
-                recievers.get(i).getInbox().add(d);
+                System.out.println("user Id is: "+recievers.get(i).getId());
+                System.out.println("Document id: "+d.getId());
+               d.getDestinations().add(recievers.get(i));
                 personneRepository.save(recievers.get(i));
-                docRepository.save(d); */
+                docRepository.save(d);
+                recievers.get(i).getInbox().add(d);
+
 
             }
-            System.out.println("Done with the the iteration number: ");
+            System.out.println("Done with the the iteration number: "+i);
         }
 
     }
