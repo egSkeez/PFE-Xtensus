@@ -224,6 +224,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         docs.remove(dc);
         System.out.println("Deleted file: "+dc.getNom());
         }
+        System.out.println("Updating "+personne.getNom());
         personneRepository.save(personne);
         return "/docs-list.xhtml?faces-redirect=true";
     }
@@ -267,6 +268,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         document.updateProperties(properties);
 
                         System.out.println("Gave "+recievers.get(i).getNom()+" all the rights!");
+                        document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
+                        System.out.println("user Id is: "+recievers.get(i).getId());
+                        System.out.println("Document id: "+d.getId());
+                        d.getDestinations().add(recievers.get(i));
+                        recievers.get(i).getInbox().add(d);
+                        personneRepository.save(recievers.get(i));
+                        docRepository.save(d);
+                        System.out.println("Added to inbox");
                     } else {
                         for(String rght: selectedRights) {
 
@@ -278,17 +287,12 @@ public class PersonneController implements IPersonneController, Serializable, ID
                             System.out.println("Treated right: "+rght);
                         }
                     }
-                    document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
-                System.out.println("user Id is: "+recievers.get(i).getId());
-                System.out.println("Document id: "+d.getId());
-               d.getDestinations().add(recievers.get(i));
-               // personneRepository.save(recievers.get(i));
-               // docRepository.save(d);
-               // recievers.get(i).getInbox().add(d);
+
+
 
 
             }
-            System.out.println("Done with the the iteration number: "+i);
+            System.out.println("Done with the the iteration number: "+i+1);
         }
 
     }

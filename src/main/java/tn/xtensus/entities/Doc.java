@@ -19,8 +19,8 @@ public class Doc implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "person_doc",
-            joinColumns = { @JoinColumn(name = "person_id",referencedColumnName ="id") },
-            inverseJoinColumns = { @JoinColumn(name = "doc_id",referencedColumnName ="id") }
+            joinColumns = { @JoinColumn(name = "doc_id",referencedColumnName ="id") },
+            inverseJoinColumns = { @JoinColumn(name = "person_id",referencedColumnName ="id") }
     )
     private Set<Personne> destinations = new HashSet<>();
 
