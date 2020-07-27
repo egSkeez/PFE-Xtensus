@@ -98,31 +98,32 @@ public class PersonneController implements IPersonneController, Serializable, ID
     public String doLogin(){
         System.out.println("######################### doLogin Function triggered #########################");
         System.out.println("User signed up: "+nom);
-       session = prem.getCmisSession(nom,password);
-        session.getDefaultContext().setCacheEnabled(false);
-        loggedIn = true;
-        System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
-
         String navigateTo = "null";
         personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
-        System.out.println("brought person: "+personne.getNom());
-        if(personne.getDocs().size()!=0){
-            docs = personne.getDocs();
-        }
-        inbox = personne.getInbox();
-        System.out.println("Inbox size: "+inbox.size());
-        for(Doc dc: docs){
-            System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
-        }
         if(personne != null ){
+            session = prem.getCmisSession(nom,password);
+            session.getDefaultContext().setCacheEnabled(false);
+            System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
+            System.out.println("brought person: "+personne.getNom());
+            if(personne.getDocs().size()!=0){
+                docs = personne.getDocs();
+            }
+            inbox = personne.getInbox();
+            System.out.println("Inbox size: "+inbox.size());
+            for(Doc dc: docs){
+                System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
+            }
             navigateTo = "/docs-list.xhtml?faces-redirect=true";
             loggedIn=true;
         } else {
+
             FacesMessage facesMessage =
                     new FacesMessage("Login  Failed: please check your  username/password and try again.");
         FacesContext.getCurrentInstance().addMessage("form:btn",facesMessage);
 
-    } return navigateTo;}
+    }
+
+        return navigateTo;}
 
 
     public void uploadFile() {
@@ -216,11 +217,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
         for(Doc dc: selectedDocs){
             System.out.println("Deleting file: "+dc.getNom());
         docRepository.delete(dc);
+        personne.getDocs().remove(dc);
+
         Document doc =(Document) session.getObject(dc.getAlfrescoId());
         doc.delete();
         docs.remove(dc);
         System.out.println("Deleted file: "+dc.getNom());
         }
+        personneRepository.save(personne);
         return "/docs-list.xhtml?faces-redirect=true";
     }
 

@@ -14,7 +14,7 @@ public class Personne implements Serializable {
     private String nom;
     private String prenom;
     private String password;
-    @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Doc> docs;
     @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "destinations")
     private Set<Doc> inbox = new HashSet<>();
