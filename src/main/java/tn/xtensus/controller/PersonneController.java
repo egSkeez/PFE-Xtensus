@@ -143,7 +143,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
             bi = BigInteger.valueOf(file.getSize());
             HashMap<String, Object> newFileProps = new HashMap<String, Object>();
             ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
-                    file.getContentType(), new ByteArrayInputStream(file.getContents()));
+                    "application/octet-stream", new ByteArrayInputStream(file.getContents()));
 
 
             //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
