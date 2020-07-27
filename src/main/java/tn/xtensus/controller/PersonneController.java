@@ -107,12 +107,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
             System.out.println("brought person: "+personne.getNom());
             if(personne.getDocs().size()!=0){
                 docs = personne.getDocs();
+                for(Doc dc: docs){
+                    System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
+                }
             }
             inbox = personne.getInbox();
             System.out.println("Inbox size: "+inbox.size());
-            for(Doc dc: docs){
-                System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
-            }
+
             navigateTo = "/docs-list.xhtml?faces-redirect=true";
             loggedIn=true;
         } else {
@@ -255,20 +256,22 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
                         aspects.add(aspectName);
 
+                        List<String> permissions = new ArrayList<String>();
+                        permissions.add("cmis:all");
+                        String principal = recievers.get(i).getNom();
+                        Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                        aceListIn.add(aceIn);
+
+                        document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
                         Map<String, Object> properties = new HashMap<String, Object>();
                         properties.put("cmis:secondaryObjectTypeIds", aspects);
                         properties.put("cm:description", recievers.get(i).getNom());
-                        List<String> permission = new ArrayList<String>();
-                        permission.add("cmis:all");
-                        String principal = recievers.get(i).getNom();
-                        Ace aceIn = session.getObjectFactory().createAce(principal, permission);
-
-                        aceListIn.add(aceIn);
-
                         document.updateProperties(properties);
 
+
+
                         System.out.println("Gave "+recievers.get(i).getNom()+" all the rights!");
-                        document.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
+                        document.applyAcl(aceListIn, null,AclPropagation.REPOSITORYDETERMINED);
                         System.out.println("user Id is: "+recievers.get(i).getId());
                         System.out.println("Document id: "+d.getId());
                         d.getDestinations().add(recievers.get(i));
@@ -280,10 +283,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         for(String rght: selectedRights) {
 
                             List<String> permissions = new ArrayList<String>();
-                            permissions.add("cmis:" + rght);
+                            permissions.add("cmis:"+rght);
                             String principal = recievers.get(i).getNom();
                             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
                             aceListIn.add(aceIn);
+                            document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
                             System.out.println("Treated right: "+rght);
                         }
                     }
@@ -325,6 +329,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public String doLogout()
     {  System.out.println("######################### Logout Function #########################");
+    docs = null;
         //this.session.clear();
         loggedIn = false;
         System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
