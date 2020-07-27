@@ -23,6 +23,7 @@ import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import tn.xtensus.entities.Doc;
 import tn.xtensus.entities.Personne;
 import tn.xtensus.repository.DocRepository;
@@ -104,7 +105,10 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
         String navigateTo = "null";
         personne=iPersonneService.getPersonneByNomAndPassword(nom,password);
-        docs = personne.getDocs();
+        System.out.println("brought person: "+personne.getNom());
+        if(personne.getDocs().size()!=0){
+            docs = personne.getDocs();
+        }
         inbox = personne.getInbox();
         System.out.println("Inbox size: "+inbox.size());
         for(Doc dc: docs){
@@ -206,18 +210,21 @@ public class PersonneController implements IPersonneController, Serializable, ID
         return null;
     }
 
+    @Transactional
     public String delete() {
         System.out.println("######################### Delete function started #########################");
         for(Doc dc: selectedDocs){
+            System.out.println("Deleting file: "+dc.getNom());
         docRepository.delete(dc);
         Document doc =(Document) session.getObject(dc.getAlfrescoId());
         doc.delete();
         docs.remove(dc);
+        System.out.println("Deleted file: "+dc.getNom());
         }
         return "/docs-list.xhtml?faces-redirect=true";
     }
 
-
+    @Transactional
     public void sendTo(){
         System.out.println("######################### Send function started #########################");
         System.out.println("Recievers size: "+recievers.size());
@@ -271,9 +278,9 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 System.out.println("user Id is: "+recievers.get(i).getId());
                 System.out.println("Document id: "+d.getId());
                d.getDestinations().add(recievers.get(i));
-                personneRepository.save(recievers.get(i));
-                docRepository.save(d);
-                recievers.get(i).getInbox().add(d);
+               // personneRepository.save(recievers.get(i));
+               // docRepository.save(d);
+               // recievers.get(i).getInbox().add(d);
 
 
             }
