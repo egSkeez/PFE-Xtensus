@@ -110,7 +110,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 for(Doc dc: docs){
                     System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
                 }
-            }
+            } 
             inbox = personne.getInbox();
             System.out.println("Inbox size: "+inbox.size());
 
@@ -306,12 +306,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
         for(Doc dc: selectedDocs) {
             Document newDocument = (Document) session.getObject(dc.getAlfrescoId());
             System.out.println(newDocument.getId());
+            System.out.println(newDocument.getContentStreamMimeType());
             try {
                 ContentStream cs = newDocument.getContentStream(null);
                 BufferedInputStream in = new BufferedInputStream(cs.getStream());
                 String home = System.getProperty("user.home");
               //  File file = new File(home+"/Downloads/" + fileName + ".txt");
-                FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + dc.getNom() + ".txt");
+                FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + dc.getNom() );
                 OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
                 byte[] buf = new byte[1024];
                 int n = 0;

@@ -58,10 +58,19 @@
 				<f:selectItem itemLabel="Middle man" itemValue="middle man" />
 			</p:selectManyCheckbox>
 			<p:separator />
-
-			<p:commandButton value="Delete" action="#{personneController.delete}" update="table" />
-			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down">
+			<p:growl id="message" showDetail="true" />
+			<p:commandButton value="Delete" action="#{personneController.delete}" update="message" >
+			<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
+			</p:commandButton>
+			<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+				<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+				<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+			</p:confirmDialog>
+			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
 		</p:commandButton>
+			<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
+				<h:outputText value="Download complete !" />
+			</p:dialog>
 	</p:panel>
 
 
