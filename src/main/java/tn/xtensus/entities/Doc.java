@@ -1,5 +1,8 @@
 package tn.xtensus.entities;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -14,6 +17,12 @@ public class Doc implements Serializable {
     private int id;
     private String alfrescoId;
     private String nom;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "doc",fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Doc_Person> inbox = new HashSet<Doc_Person>();
+
+
     @ManyToOne
     private Personne expediteur;
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -71,5 +80,13 @@ public class Doc implements Serializable {
 
     public void setDestinations(Set<Personne> destinations) {
         this.destinations = destinations;
+    }
+
+    public Set<Doc_Person> getInbox() {
+        return inbox;
+    }
+
+    public void setInbox(Set<Doc_Person> inbox) {
+        this.inbox = inbox;
     }
 }

@@ -25,8 +25,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tn.xtensus.entities.Doc;
+import tn.xtensus.entities.Doc_Person;
 import tn.xtensus.entities.Personne;
 import tn.xtensus.repository.DocRepository;
+import tn.xtensus.repository.InboxRepository;
 import tn.xtensus.repository.PersonneRepository;
 import tn.xtensus.service.IDocService;
 import tn.xtensus.service.IPersonneService;
@@ -70,8 +72,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Personne> recievers;
     private List<Doc> selectedDocs;
     private Boolean loggedin = false;
-    private Set<Doc> inbox;
+    private Set<Doc_Person> inbox = new HashSet<Doc_Person>();
+    private Set<Doc> docInbox = new HashSet<Doc>();
     private List<Doc> selectedInbox;
+    @Autowired
+    InboxRepository inboxRepository;
     @Autowired
     PersonneRepository personneRepository;
     @Autowired
@@ -94,7 +99,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         System.out.println("Getting people");
         return people = iPersonneService.getPersonnes();
     }
-
+    @Transactional
     public String doLogin(){
         System.out.println("######################### doLogin Function triggered #########################");
         System.out.println("User signed up: "+nom);
@@ -110,10 +115,15 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 for(Doc dc: docs){
                     System.out.println("Document de "+personne.getNom()+" Est: "+dc.getNom());
                 }
-            } 
-            inbox = personne.getInbox();
-            System.out.println("Inbox size: "+inbox.size());
+            }
+            docInbox.removeAll(docInbox);
+            inbox = inboxRepository.getInboxByUser(personne.getId());
 
+            Iterator<Doc_Person> it = inbox.iterator();
+            while(it.hasNext()){
+
+                docInbox.add(it.next().getDoc());
+            }
             navigateTo = "/docs-list.xhtml?faces-redirect=true";
             loggedIn=true;
         } else {
@@ -230,7 +240,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         return "/docs-list.xhtml?faces-redirect=true";
     }
 
-    @Transactional
+    //@Transactional
     public void sendTo(){
         System.out.println("######################### Send function started #########################");
         System.out.println("Recievers size: "+recievers.size());
@@ -246,6 +256,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 List<Ace> aceListIn = new ArrayList<Ace>();
                 Document document = (Document) session.getObject(d.getAlfrescoId());
                 System.out.println("Treating document: "+document.getName());
+                Doc_Person inbox = new Doc_Person();
+                inbox.setDoc(d);
+                inbox.setUser(recievers.get(i));
+                inboxRepository.save(inbox);
+                System.out.println("Added document to inbox");
                 String aspectName = "P:cm:titled";
 
                     // Check that document don't already got the aspect applied
@@ -275,9 +290,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         System.out.println("user Id is: "+recievers.get(i).getId());
                         System.out.println("Document id: "+d.getId());
                         d.getDestinations().add(recievers.get(i));
-                        recievers.get(i).getInbox().add(d);
-                        personneRepository.save(recievers.get(i));
-                        docRepository.save(d);
+
                         System.out.println("Added to inbox");
                     } else {
                         for(String rght: selectedRights) {
@@ -463,11 +476,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
         this.loggedin = loggedin;
     }
 
-    public Set<Doc> getInbox() {
+    public Set<Doc_Person> getInbox() {
         return inbox;
     }
 
-    public void setInbox(Set<Doc> inbox) {
+    public void setInbox(Set<Doc_Person> inbox) {
         this.inbox = inbox;
     }
 
@@ -477,5 +490,21 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setSelectedInbox(List<Doc> selectedInbox) {
         this.selectedInbox = selectedInbox;
+    }
+
+    public InboxRepository getInboxRepository() {
+        return inboxRepository;
+    }
+
+    public void setInboxRepository(InboxRepository inboxRepository) {
+        this.inboxRepository = inboxRepository;
+    }
+
+    public Set<Doc> getDocInbox() {
+        return docInbox;
+    }
+
+    public void setDocInbox(Set<Doc> docInbox) {
+        this.docInbox = docInbox;
     }
 }

@@ -33,7 +33,7 @@
 				</p:column>
 
 			</p:dataTable>
-			<p:dataTable id="table1" var="doc" value="#{personneController.inbox}"
+			<p:dataTable id="table1" var="doc" value="#{personneController.docInbox}"
 						 selectionMode="multiple"
 						 selection="#{personneController.selectedInbox}"
 						 rowKey="#{doc.alfrescoId}" >
@@ -44,7 +44,7 @@
 				</p:column>
 				<p:column>
 					<f:facet name="header">Name</f:facet>
-					<h:outputText value="#{document.nom}"/>
+					<h:outputText value="#{doc.nom}"/>
 
 				</p:column>
 

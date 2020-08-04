@@ -1,5 +1,8 @@
 package tn.xtensus.entities;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -14,6 +17,12 @@ public class Personne implements Serializable {
     private String nom;
     private String prenom;
     private String password;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user",fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Doc_Person> userGroups = new HashSet<Doc_Person>();
+
+
     @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Doc> docs;
     @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "destinations")
@@ -76,5 +85,13 @@ public class Personne implements Serializable {
 
     public void setInbox(Set<Doc> inbox) {
         this.inbox = inbox;
+    }
+
+    public Set<Doc_Person> getUserGroups() {
+        return userGroups;
+    }
+
+    public void setUserGroups(Set<Doc_Person> userGroups) {
+        this.userGroups = userGroups;
     }
 }
