@@ -1,13 +1,9 @@
 package tn.xtensus.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
@@ -17,22 +13,17 @@ import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.Acl;
-import org.apache.chemistry.opencmis.commons.data.AclCapabilities;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
-import org.apache.chemistry.opencmis.commons.data.PermissionMapping;
-import org.apache.chemistry.opencmis.commons.definitions.PermissionDefinition;
 import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.CapabilityAcl;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
-import org.ocpsoft.rewrite.annotation.Join;
 import org.ocpsoft.rewrite.el.ELBeanName;
 import org.primefaces.model.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import tn.xtensus.entities.Doc;
-import tn.xtensus.repository.DocRepository;
 import tn.xtensus.service.IDocService;
 
 @Scope(value = "session")
@@ -69,7 +60,7 @@ public class DocumentController extends LocalConfig implements IDocumentControll
             newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             List<String> permissions = new ArrayList<String>();
             permissions.add("cmis:all");
-            String principal = "admin";
+            String principal = "static/admin";
             Ace aceIn = ((Session) session).getObjectFactory().createAce(principal, permissions);
             List<Ace> aceListIn = new ArrayList<Ace>();
             aceListIn.add(aceIn);

@@ -229,7 +229,7 @@ public class LocalConfig {
                 @Override
                 public void initialize(HttpRequest request) throws IOException {
                     request.setParser(new JsonObjectParser(new JacksonFactory()));
-                    request.getHeaders().setBasicAuthentication("admin","admin");
+                    request.getHeaders().setBasicAuthentication("static/admin", "static/admin");
                 }
             });
         }

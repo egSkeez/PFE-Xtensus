@@ -8,6 +8,8 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import javax.faces.webapp.FacesServlet;
 import javax.servlet.DispatcherType;
@@ -34,4 +36,5 @@ public class SpringBootDataJpaJsfAuthentificationApplication {
         rwFilter.addUrlPatterns("/*");
         return rwFilter;
     }
+
 }

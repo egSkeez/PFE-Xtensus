@@ -52,7 +52,7 @@ import static java.lang.Integer.valueOf;
 @Scope(value = "session")
 @Component(value = "personneController")
 @ELBeanName(value = "personneController")
-@Join(path = "/", to = "/login.jsf")
+@Join(path = "/", to = "/WEB-INF/jsp/login.jsf")
 @ViewScoped
 @Named("personneController")
 public class PersonneController implements IPersonneController, Serializable, IDocumentController {
@@ -68,6 +68,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Personne> people;
     private List<Personne> filteredPeople;
     private String[] selectedRights;
+    private Doc docDetails;
     private List<SelectItem> rights;
     private List<Personne> recievers;
     private List<Doc> selectedDocs;
@@ -355,6 +356,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     }
 
+    public String docDetails(Doc doc_dt)
+    {
+        System.out.println("######################### Detail Function #########################");
+        docDetails=doc_dt;
+        return "/docs-details.xhtml?faces-redirect=true";
+    }
+
     public String getNom() {
         return nom;
     }
@@ -506,5 +514,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setDocInbox(Set<Doc> docInbox) {
         this.docInbox = docInbox;
+    }
+
+    public Doc getDocDetails() {
+        return docDetails;
+    }
+
+    public void setDocDetails(Doc docDetails) {
+        this.docDetails = docDetails;
     }
 }
