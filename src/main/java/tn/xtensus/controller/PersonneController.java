@@ -179,6 +179,12 @@ public class PersonneController implements IPersonneController, Serializable, ID
             dbDoc.setAlfrescoId(testDoc.getId());
             dbDoc.setNom(file.getFileName());
             dbDoc.setExpediteur(personne);
+            dbDoc.setAuthor(testDoc.getCreatedBy());
+            dbDoc.setCreationDate(testDoc.getCreationDate().toString());
+            dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable"));
+            dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType"));
+            dbDoc.setModificationDate(testDoc.getPropertyValue("cmis:lastModificationDate"));
+            dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel"));
             docRepository.save(dbDoc);
             System.out.println("Document added to Database !");
 

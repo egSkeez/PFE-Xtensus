@@ -32,6 +32,13 @@ public class Doc implements Serializable {
             inverseJoinColumns = { @JoinColumn(name = "person_id",referencedColumnName ="id") }
     )
     private Set<Personne> destinations = new HashSet<>();
+    private String isImmutable;
+    private String version;
+    private String createdBy;
+    private String modificationDate;
+    private String author;
+    private String mimeType;
+    private String creationDate;
 
     public Doc() {
     }
@@ -88,5 +95,61 @@ public class Doc implements Serializable {
 
     public void setInbox(Set<Doc_Person> inbox) {
         this.inbox = inbox;
+    }
+
+    public String getIsImmutable() {
+        return isImmutable;
+    }
+
+    public void setIsImmutable(String isImmutable) {
+        this.isImmutable = isImmutable;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getModificationDate() {
+        return modificationDate;
+    }
+
+    public void setModificationDate(String modificationDate) {
+        this.modificationDate = modificationDate;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(String creationDate) {
+        this.creationDate = creationDate;
     }
 }
