@@ -82,7 +82,7 @@
 			</div>
 		</div>
 		<h:form>
-		<div class="main-card mb-3 card">
+			<div class="main-card mb-3 card">
 			<div class="card-body"><h5 class="card-title">People</h5>
 				<table class="mb-0 table table-hover">
 					<thead>
@@ -90,7 +90,7 @@
 						<th>First Name</th>
 						<th>Last Name</th>
 						<th>Send Document</th>
-
+						<th>Rights</th>
 					</tr>
 					</thead>
 					<tbody>
@@ -100,8 +100,18 @@
 								<h:outputText value="#{person.nom}" />
 							</td>
 							<td><h:outputText value="#{person.prenom}" /></td>
+
 							<td>
-								<p:commandButton value="Send" icon="ui-icon-bookmark" action="#{personneController.sendTo(person)}"  />
+								<h:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
+									<f:selectItem itemLabel="Read" itemValue="read" />
+									<f:selectItem itemLabel="Write" itemValue="write" />
+									<f:selectItem itemLabel="All" itemValue="all" />
+									<f:selectItem itemLabel="Middle man" itemValue="middle man" />
+								</h:selectManyCheckbox>
+							</td>
+							<td>
+								<p:commandButton class="mb-2 mr-2 btn-transition btn btn-outline-primary" value="Send" action="#{personneController.sendTo(person)}"/>
+
 							</td>
 						</tr>
 					</c:forEach>

@@ -35,6 +35,7 @@ import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.bean.SessionScoped;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -53,7 +54,7 @@ import static java.lang.Integer.valueOf;
 @Component(value = "personneController")
 @ELBeanName(value = "personneController")
 @Join(path = "/", to = "/WEB-INF/jsp/login.jsf")
-@ViewScoped
+@SessionScoped
 @Named("personneController")
 public class PersonneController implements IPersonneController, Serializable, IDocumentController {
 

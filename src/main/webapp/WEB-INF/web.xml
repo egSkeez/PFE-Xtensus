@@ -15,4 +15,16 @@
     <listener>
         <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
+    <context-param>
+        <param-name>javax.faces.PARTIAL_STATE_SAVING</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <description>If this property is set to true, the number
+            that is used to generate new client IDs is stored in the view
+            so that it is saved between requests.
+        </description>
+        <param-name>com.ibm.ws.jsf.storeDynamicClientIds</param-name>
+        <param-value>true</param-value>
+    </context-param>
 </web-app>
