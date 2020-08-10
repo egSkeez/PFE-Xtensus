@@ -248,24 +248,16 @@ public class PersonneController implements IPersonneController, Serializable, ID
     }
 
     //@Transactional
-    public void sendTo(){
+    public void sendTo(Personne reciever){
         System.out.println("######################### Send function started #########################");
-        System.out.println("Recievers size: "+recievers.size());
-        System.out.println("Documents selected: "+selectedDocs.size());
-        System.out.println("Number of rights selected: "+Arrays.asList(selectedRights).size());
-
-        for(int i=0;i<recievers.size();i++) {
-            System.out.println("Treating user: "+recievers.get(i).getNom());
-
-            for(Doc d: selectedDocs) {
-
-
+        System.out.println("reciever name: "+reciever.getNom());
+        System.out.println("Doc name: "+docDetails.getNom());
                 List<Ace> aceListIn = new ArrayList<Ace>();
-                Document document = (Document) session.getObject(d.getAlfrescoId());
+                Document document = (Document) session.getObject(docDetails.getAlfrescoId());
                 System.out.println("Treating document: "+document.getName());
                 Doc_Person inbox = new Doc_Person();
-                inbox.setDoc(d);
-                inbox.setUser(recievers.get(i));
+                inbox.setDoc(docDetails);
+                inbox.setUser(reciever);
                 inboxRepository.save(inbox);
                 System.out.println("Added document to inbox");
                 String aspectName = "P:cm:titled";
@@ -280,23 +272,23 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
                         List<String> permissions = new ArrayList<String>();
                         permissions.add("cmis:all");
-                        String principal = recievers.get(i).getNom();
+                        String principal = reciever.getNom();
                         Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
                         aceListIn.add(aceIn);
 
                         document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
                         Map<String, Object> properties = new HashMap<String, Object>();
                         properties.put("cmis:secondaryObjectTypeIds", aspects);
-                        properties.put("cm:description", recievers.get(i).getNom());
+                        properties.put("cm:description", reciever.getNom());
                         document.updateProperties(properties);
 
 
 
-                        System.out.println("Gave "+recievers.get(i).getNom()+" all the rights!");
+                        System.out.println("Gave "+reciever.getNom()+" all the rights!");
                         document.applyAcl(aceListIn, null,AclPropagation.REPOSITORYDETERMINED);
-                        System.out.println("user Id is: "+recievers.get(i).getId());
-                        System.out.println("Document id: "+d.getId());
-                        d.getDestinations().add(recievers.get(i));
+                        System.out.println("user Id is: "+reciever.getId());
+                        System.out.println("Document id: "+docDetails.getId());
+                        docDetails.getDestinations().add(reciever);
 
                         System.out.println("Added to inbox");
                     } else {
@@ -304,7 +296,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
                             List<String> permissions = new ArrayList<String>();
                             permissions.add("cmis:"+rght);
-                            String principal = recievers.get(i).getNom();
+                            String principal = reciever.getNom();
                             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
                             aceListIn.add(aceIn);
                             document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
@@ -312,12 +304,6 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         }
                     }
 
-
-
-
-            }
-            System.out.println("Done with the the iteration number: "+i+1);
-        }
 
     }
     public void downloadDocument()
@@ -366,6 +352,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     {
         System.out.println("######################### Detail Function #########################");
         docDetails=doc_dt;
+        System.out.println("Selected document: "+docDetails.getNom());
         return "/docs-details.xhtml?faces-redirect=true";
     }
 

@@ -81,6 +81,7 @@
 				</div>
 			</div>
 		</div>
+		<h:form>
 		<div class="main-card mb-3 card">
 			<div class="card-body"><h5 class="card-title">People</h5>
 				<table class="mb-0 table table-hover">
@@ -100,7 +101,7 @@
 							</td>
 							<td><h:outputText value="#{person.prenom}" /></td>
 							<td>
-								<p:commandButton value="Send" icon="ui-icon-bookmark" action="#{personneController.sendTo(document)}"  />
+								<p:commandButton value="Send" icon="ui-icon-bookmark" action="#{personneController.sendTo(person)}"  />
 							</td>
 						</tr>
 					</c:forEach>
@@ -110,6 +111,7 @@
 				</table>
 			</div>
 		</div>
+		</h:form>
 
 
 	</section>
