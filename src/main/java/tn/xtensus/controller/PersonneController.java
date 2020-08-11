@@ -68,15 +68,17 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Doc> docs;
     private List<Personne> people;
     private List<Personne> filteredPeople;
-    private String[] selectedRights;
+    private List<String> selectedRights;
     private Doc docDetails;
     private List<SelectItem> rights;
     private List<Personne> recievers;
     private List<Doc> selectedDocs;
+    private Doc selectedDoc;
     private Boolean loggedin = false;
     private Set<Doc_Person> inbox = new HashSet<Doc_Person>();
     private Set<Doc> docInbox = new HashSet<Doc>();
     private List<Doc> selectedInbox;
+    private Document document;
     @Autowired
     InboxRepository inboxRepository;
     @Autowired
@@ -248,24 +250,29 @@ public class PersonneController implements IPersonneController, Serializable, ID
         return "/docs-list.xhtml?faces-redirect=true";
     }
 
-    //@Transactional
-    public void sendTo(Personne reciever){
+    @Transactional
+    public void sendTo(){
         System.out.println("######################### Send function started #########################");
-        System.out.println("reciever name: "+reciever.getNom());
-        System.out.println("Doc name: "+docDetails.getNom());
-                List<Ace> aceListIn = new ArrayList<Ace>();
-                Document document = (Document) session.getObject(docDetails.getAlfrescoId());
-                System.out.println("Treating document: "+document.getName());
-                Doc_Person inbox = new Doc_Person();
-                inbox.setDoc(docDetails);
-                inbox.setUser(reciever);
-                inboxRepository.save(inbox);
-                System.out.println("Added document to inbox");
-                String aspectName = "P:cm:titled";
+        System.out.println("reciever name: "+recievers.get(0).getNom());
+        System.out.println("Doc name: "+selectedDoc.getNom());
+        System.out.println("Selected rights: "+selectedRights.get(0));
+        List<Ace> aceListIn = new ArrayList<Ace>();
+        System.out.println("Created Ace");
+        System.out.println("Alfresco Id: "+ selectedDoc.getAlfrescoId());
+        String alfrescoId = selectedDoc.getAlfrescoId();
+        System.out.println("CMIS version:"+session.getRepositoryInfo().getCmisVersion());
+        document = (Document) session.getObject(alfrescoId);
+        System.out.println("Treating document: "+document.getName());
+        Doc_Person inbox = new Doc_Person();
+        inbox.setDoc(selectedDoc);
+        inbox.setUser(recievers.get(0));
+        inboxRepository.save(inbox);
+        System.out.println("Added document to inbox");
+        String aspectName = "P:cm:titled";
 
                     // Check that document don't already got the aspect applied
-                    if(Arrays.asList(selectedRights).contains("middle man"))
-                    {
+        /* if(selectedRights.contains("middle man"))
+        {
                         System.out.println("Treating middle man!");
                     List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
 
@@ -273,37 +280,37 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
                         List<String> permissions = new ArrayList<String>();
                         permissions.add("cmis:all");
-                        String principal = reciever.getNom();
+                        String principal = recievers.get(0).getNom();
                         Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
                         aceListIn.add(aceIn);
 
                         document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
                         Map<String, Object> properties = new HashMap<String, Object>();
                         properties.put("cmis:secondaryObjectTypeIds", aspects);
-                        properties.put("cm:description", reciever.getNom());
+                        properties.put("cm:description", recievers.get(0).getNom());
                         document.updateProperties(properties);
 
 
 
-                        System.out.println("Gave "+reciever.getNom()+" all the rights!");
+                        System.out.println("Gave "+recievers.get(0).getNom()+" all the rights!");
                         document.applyAcl(aceListIn, null,AclPropagation.REPOSITORYDETERMINED);
-                        System.out.println("user Id is: "+reciever.getId());
-                        System.out.println("Document id: "+docDetails.getId());
-                        docDetails.getDestinations().add(reciever);
+                        System.out.println("user Id is: "+recievers.get(0).getId());
+                        System.out.println("Document id: "+selectedDoc.getId());
+                        selectedDoc.getDestinations().add(recievers.get(0));
 
                         System.out.println("Added to inbox");
-                    } else {
+        } else { */
                         for(String rght: selectedRights) {
-
+                            System.out.println("right in progress: "+rght);
                             List<String> permissions = new ArrayList<String>();
                             permissions.add("cmis:"+rght);
-                            String principal = reciever.getNom();
+                            String principal = recievers.get(0).getNom();
                             Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
                             aceListIn.add(aceIn);
                             document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
                             System.out.println("Treated right: "+rght);
                         }
-                    }
+                   // }
 
 
     }
@@ -438,11 +445,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
         this.filteredPeople = filteredPeople;
     }
 
-    public String[] getSelectedRights() {
+    public List<String> getSelectedRights() {
         return selectedRights;
     }
 
-    public void setSelectedRights(String[] selectedRights) {
+    public void setSelectedRights(List<String> selectedRights) {
         this.selectedRights = selectedRights;
     }
 
@@ -516,5 +523,17 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setDocDetails(Doc docDetails) {
         this.docDetails = docDetails;
+    }
+
+    public Doc getSelectedDoc() {
+        return selectedDoc;
+    }
+
+    public void setSelectedDoc(Doc selectedDoc) {
+        this.selectedDoc = selectedDoc;
+    }
+
+    public void setDocument(Document document) {
+        this.document = document;
     }
 }

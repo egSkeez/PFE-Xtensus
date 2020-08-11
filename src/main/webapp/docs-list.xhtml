@@ -11,93 +11,117 @@
 <ui:composition template="/WEB-INF/jsp/layout_admin.xhtml">
 <ui:define name="content">
 
-	<h:form enctype="multipart/form-data" id="uploadform">
-		<p:commandButton id="btn" value="Logout" action="#{personneController.doLogout}" />
-		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true"/>
-		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}"
-						 disabled="false" />
+	<section class="section about-section gray-bg" id="about">
+	<div class="container">
+		<h2>Primefaces DataTable Selection Event Example</h2>
+		<h:form id="mainForm">
+			<table>
+				<tr>
+					<td style="width:300px;border:solid 1px gray;">
+						<p:dataTable var="document"
+									 value="#{personneController.docs}"
+									 selectionMode="single"
+									 rowKey="#{document.id}"
+									 selection="#{personneController.selectedDoc}"
+									 scrollable="true" scrollHeight="400">
+							<p:ajax event="rowSelect"
+									update="mainForm:detailsPanel"/>
+							<p:column headerText="Id">
+								<h:outputText value="#{document.id}"/>
+							</p:column>
 
-		<p:panel header="My Documents">
+							<p:column headerText="Name">
+								<h:outputText value="#{document.nom}"/>
+							</p:column>
+						</p:dataTable>
+					</td>
+					<td style="vertical-align:top;padding: 50px; ">
+						<p:outputPanel id="detailsPanel" style="display:block">
+							<h3>Details:</h3>
+							<table>
+								<tr>
+									<td>Name</td>
+									<td>#{personneController.selectedDoc.nom}</td>
+								</tr>
+								<tr>
+									<td style="width:200px;">Phone Number</td>
+									<td>#{personneController.selectedDoc.author}</td>
+								</tr>
+								<tr>
+									<td>Creation date</td>
+									<td>#{personneController.selectedDoc.creationDate}</td>
+								</tr>
+								<tr>
+									<td>Type</td>
+									<td>#{personneController.selectedDoc.mimeType}</td>
+								</tr>
+								<tr>
+									<td>Version</td>
+									<td>#{PersonneController.selectedDoc.version }</td>
+								</tr>
+								<tr>
+									<td>Modification date</td>
+									<td>#{PersonneController.selectedDoc.modificationDate}</td>
+								</tr>
+							</table>
+						</p:outputPanel>
+					</td>
+				</tr>
+			</table>
+		</h:form>
+		<br/>
+		<br/>
 
-			<p:dataTable id="table" var="document" value="#{personneController.docs}"
-						 selectionMode="multiple"
-						 selection="#{personneController.selectedDocs}"
-						 rowKey="#{document.alfrescoId}" >
+	</div>
+	<h:form>
+		<div class="main-card mb-3 card">
+			<div class="card-body"><h5 class="card-title">People</h5>
+				<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
+							 emptyMessage="None found with given criteria"
+							 filteredValue="#{personneController.filteredPeople}"
+							 selectionMode="multiple"
+							 selection="#{personneController.recievers}"
+							 rowKey="#{personne.id}" >
+					<p:column headerText="Id" style="width:20px;">
+						<h:outputText value="#{personne.id}" />
+					</p:column>
+					<p:column filterBy="#{personne.nom}"
+							  headerText="Name"
+							  filterMatchMode="contains"
+							  placeholder="Name">
+						<h:outputText value="#{personne.nom}" />
+					</p:column>
 
-				<p:column>
-					<f:facet name="header">Alfresco ID</f:facet>
-					<h:outputText value="#{document.alfrescoId}" />
-				</p:column>
-				<p:column>
-					<f:facet name="header">Name</f:facet>
-					<h:outputText value="#{document.nom}"/>
+					<p:column headerText="Last Name" >
+						<h:outputText value="#{personne.prenom}" />
+					</p:column>
+				</p:dataTable>
 
-				</p:column>
-
-			</p:dataTable>
-			<p:dataTable id="table1" var="doc" value="#{personneController.docInbox}"
-						 selectionMode="multiple"
-						 selection="#{personneController.selectedInbox}"
-						 rowKey="#{doc.alfrescoId}" >
-
-				<p:column>
-					<f:facet name="header">Alfresco ID</f:facet>
-					<h:outputText value="#{doc.alfrescoId}" />
-				</p:column>
-				<p:column>
-					<f:facet name="header">Name</f:facet>
-					<h:outputText value="#{doc.nom}"/>
-
-				</p:column>
-
-			</p:dataTable>
-
-
-			<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
-				<f:selectItem itemLabel="Read" itemValue="read" />
-				<f:selectItem itemLabel="Write" itemValue="write" />
-				<f:selectItem itemLabel="All" itemValue="all" />
-				<f:selectItem itemLabel="Middle man" itemValue="middle man" />
-			</p:selectManyCheckbox>
-			<p:separator />
-			<p:growl id="message" showDetail="true" />
-			<p:commandButton value="Delete" action="#{personneController.delete}" update="message" >
-				<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
-			</p:commandButton>
-			<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
-				<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
-				<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
-			</p:confirmDialog>
-			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
-			</p:commandButton>
-			<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
-				<h:outputText value="Download complete !" />
-			</p:dialog>
-		</p:panel>
-
-
-		<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
-					 emptyMessage="None found with given criteria"
-					 filteredValue="#{personneController.filteredPeople}"
-					 selectionMode="multiple"
-					 selection="#{personneController.recievers}"
-					 rowKey="#{personne.id}" >
-			<p:column headerText="Id" style="width:20px;">
-				<h:outputText value="#{personne.id}" />
-			</p:column>
-			<p:column filterBy="#{personne.nom}"
-					  headerText="Name"
-					  filterMatchMode="contains"
-					  placeholder="Name">
-				<h:outputText value="#{personne.nom}" />
-			</p:column>
-
-			<p:column headerText="Last Name" >
-				<h:outputText value="#{personne.prenom}" />
-			</p:column>
-		</p:dataTable>
+			</div>
+		</div>
+		<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
+			<f:selectItem itemLabel="Read" itemValue="read" />
+			<f:selectItem itemLabel="Write" itemValue="write" />
+			<f:selectItem itemLabel="All" itemValue="all" />
+			<f:selectItem itemLabel="Middle man" itemValue="middle man" />
+		</p:selectManyCheckbox>
+		<p:separator />
+		<p:growl id="message" showDetail="true" />
+		<p:commandButton value="Delete" action="#{personneController.delete}" update="message" >
+			<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
+		</p:commandButton>
+		<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+			<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+			<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+		</p:confirmDialog>
+		<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
+		</p:commandButton>
+		<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
+			<h:outputText value="Download complete !" />
+		</p:dialog>
 		<p:commandButton value="Send" action="#{personneController.sendTo}" />
 	</h:form>
+	</section>
 
 
 
