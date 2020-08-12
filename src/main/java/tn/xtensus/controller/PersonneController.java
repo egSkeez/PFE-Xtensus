@@ -163,7 +163,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
 
             //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-            newFileProps.put(PropertyIds.NAME, file.getFileName());
+            newFileProps.put(PropertyIds.NAME, personne.getNom());
             newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             List<String> permissions = new ArrayList<String>();
             permissions.add("cmis:all");
