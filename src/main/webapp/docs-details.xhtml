@@ -20,7 +20,7 @@
 					<tr>
 						<td style="width:300px;border:solid 1px gray;">
 							<p:dataTable var="document"
-										 value="#{personneController.docs}"
+										 value="#{personneController.docInbox}"
 										 selectionMode="single"
 										 rowKey="#{document.id}"
 										 selection="#{personneController.selectedDoc}"
@@ -121,6 +121,7 @@
 				<h:outputText value="Download complete !" />
 			</p:dialog>
 		</h:form>
+
 
 
 	</section>

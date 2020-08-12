@@ -13,11 +13,11 @@
 
 	<section class="section about-section gray-bg" id="about">
 	<div class="container">
-		<h2>Primefaces DataTable Selection Event Example</h2>
+		<h2>Document List</h2>
 		<h:form id="mainForm">
 			<table>
 				<tr>
-					<td style="width:300px;border:solid 1px gray;">
+					<td style="width:400px;border:solid 1px gray;">
 						<p:dataTable var="document"
 									 value="#{personneController.docs}"
 									 selectionMode="single"
@@ -26,7 +26,7 @@
 									 scrollable="true" scrollHeight="400">
 							<p:ajax event="rowSelect"
 									update="mainForm:detailsPanel"/>
-							<p:column headerText="Id">
+							<p:column headerText="Id" style="width:35px;">
 								<h:outputText value="#{document.id}"/>
 							</p:column>
 
@@ -44,7 +44,7 @@
 									<td>#{personneController.selectedDoc.nom}</td>
 								</tr>
 								<tr>
-									<td style="width:200px;">Phone Number</td>
+									<td style="width:200px;">Author</td>
 									<td>#{personneController.selectedDoc.author}</td>
 								</tr>
 								<tr>
@@ -120,7 +120,13 @@
 			<h:outputText value="Download complete !" />
 		</p:dialog>
 		<p:commandButton value="Send" action="#{personneController.sendTo}" />
+		<p:commandButton value="Inbox" action="#{personneController.inboxPage}" />
 	</h:form>
+		<h:form enctype="multipart/form-data" id="uploadform">
+			<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>
+			<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}"
+							 disabled="false" />
+		</h:form>
 	</section>
 
 

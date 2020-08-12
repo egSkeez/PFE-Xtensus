@@ -45,6 +45,8 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static java.lang.Integer.getInteger;
@@ -182,12 +184,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
             dbDoc.setAlfrescoId(testDoc.getId());
             dbDoc.setNom(file.getFileName());
             dbDoc.setExpediteur(personne);
-            dbDoc.setAuthor(testDoc.getCreatedBy());
-            dbDoc.setCreationDate(testDoc.getCreationDate().toString());
-            dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable"));
-            dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType"));
-            dbDoc.setModificationDate(testDoc.getPropertyValue("cmis:lastModificationDate"));
-            dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel"));
+           dbDoc.setAuthor(testDoc.getCreatedBy());
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            dbDoc.setCreationDate(dtf.format(now));
+            dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable").toString());
+            dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType").toString());
+           dbDoc.setModificationDate(dtf.format(now));
+            dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel").toString());
             docRepository.save(dbDoc);
             System.out.println("Document added to Database !");
 
@@ -235,16 +239,15 @@ public class PersonneController implements IPersonneController, Serializable, ID
     @Transactional
     public String delete() {
         System.out.println("######################### Delete function started #########################");
-        for(Doc dc: selectedDocs){
-            System.out.println("Deleting file: "+dc.getNom());
-        docRepository.delete(dc);
-        personne.getDocs().remove(dc);
+            System.out.println("Deleting file: "+selectedDoc.getNom());
+        docRepository.delete(selectedDoc);
+        personne.getDocs().remove(selectedDoc);
 
-        Document doc =(Document) session.getObject(dc.getAlfrescoId());
+        Document doc =(Document) session.getObject(selectedDoc.getAlfrescoId());
         doc.delete();
-        docs.remove(dc);
-        System.out.println("Deleted file: "+dc.getNom());
-        }
+        docs.remove(selectedDoc);
+        System.out.println("Deleted file: "+selectedDoc.getNom());
+
         System.out.println("Updating "+personne.getNom());
         personneRepository.save(personne);
         return "/docs-list.xhtml?faces-redirect=true";
@@ -301,14 +304,46 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         System.out.println("Added to inbox");
         } else { */
                         for(String rght: selectedRights) {
-                            System.out.println("right in progress: "+rght);
-                            List<String> permissions = new ArrayList<String>();
-                            permissions.add("cmis:"+rght);
-                            String principal = recievers.get(0).getNom();
-                            Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
-                            aceListIn.add(aceIn);
-                            document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
-                            System.out.println("Treated right: "+rght);
+                            if(rght.equals("middle man"))
+                            {
+                                System.out.println("Treating middle man!");
+                                List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
+
+                                aspects.add(aspectName);
+
+                                List<String> permissions = new ArrayList<String>();
+                                permissions.add("cmis:all");
+                                String principal = recievers.get(0).getNom();
+                                Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                                aceListIn.add(aceIn);
+
+                                document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
+                                Map<String, Object> properties = new HashMap<String, Object>();
+                                properties.put("cmis:secondaryObjectTypeIds", aspects);
+                                properties.put("cm:description", recievers.get(0).getNom());
+                                document.updateProperties(properties);
+
+
+
+                                System.out.println("Gave "+recievers.get(0).getNom()+" all the rights!");
+                                document.applyAcl(aceListIn, null,AclPropagation.REPOSITORYDETERMINED);
+                                System.out.println("user Id is: "+recievers.get(0).getId());
+                                System.out.println("Document id: "+selectedDoc.getId());
+                                selectedDoc.getDestinations().add(recievers.get(0));
+
+                                System.out.println("Added to inbox");
+                            } else {
+
+                                System.out.println("right in progress: " + rght);
+                                List<String> permissions = new ArrayList<String>();
+                                permissions.add("cmis:" + rght);
+                                String principal = recievers.get(0).getNom();
+                                Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                                aceListIn.add(aceIn);
+                                document.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
+                                document.refresh();
+                                System.out.println("Treated right: " + rght);
+                            }
                         }
                    // }
 
@@ -317,8 +352,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     public void downloadDocument()
     {
         System.out.println("######################### Download Function #########################");
-        for(Doc dc: selectedDocs) {
-            Document newDocument = (Document) session.getObject(dc.getAlfrescoId());
+            Document newDocument = (Document) session.getObject(selectedDoc.getAlfrescoId());
             System.out.println(newDocument.getId());
             System.out.println(newDocument.getContentStreamMimeType());
             try {
@@ -326,7 +360,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 BufferedInputStream in = new BufferedInputStream(cs.getStream());
                 String home = System.getProperty("user.home");
               //  File file = new File(home+"/Downloads/" + fileName + ".txt");
-                FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + dc.getNom() );
+                FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + selectedDoc.getNom() );
                 OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
                 byte[] buf = new byte[1024];
                 int n = 0;
@@ -339,7 +373,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
             } catch (IOException e) {
                 throw new RuntimeException(e.getLocalizedMessage());
             }
-        }
+
     }
 
     public String doLogout()
@@ -356,11 +390,9 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     }
 
-    public String docDetails(Doc doc_dt)
+    public String inboxPage()
     {
-        System.out.println("######################### Detail Function #########################");
-        docDetails=doc_dt;
-        System.out.println("Selected document: "+docDetails.getNom());
+        System.out.println("######################### inbox Function #########################");
         return "/docs-details.xhtml?faces-redirect=true";
     }
 
