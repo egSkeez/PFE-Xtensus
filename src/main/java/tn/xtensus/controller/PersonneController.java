@@ -274,40 +274,10 @@ public class PersonneController implements IPersonneController, Serializable, ID
         inboxRepository.save(inbox);
         System.out.println("Added document to inbox");
         String aspectName = "P:cm:titled";
-
-                    // Check that document don't already got the aspect applied
-        /* if(selectedRights.contains("middle man"))
-        {
-                        System.out.println("Treating middle man!");
-                    List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
-
-                        aspects.add(aspectName);
-
-                        List<String> permissions = new ArrayList<String>();
-                        permissions.add("cmis:all");
-                        String principal = recievers.get(0).getNom();
-                        Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
-                        aceListIn.add(aceIn);
-
-                        document.applyAcl(aceListIn,null, AclPropagation.OBJECTONLY);
-                        Map<String, Object> properties = new HashMap<String, Object>();
-                        properties.put("cmis:secondaryObjectTypeIds", aspects);
-                        properties.put("cm:description", recievers.get(0).getNom());
-                        document.updateProperties(properties);
-
-
-
-                        System.out.println("Gave "+recievers.get(0).getNom()+" all the rights!");
-                        document.applyAcl(aceListIn, null,AclPropagation.REPOSITORYDETERMINED);
-                        System.out.println("user Id is: "+recievers.get(0).getId());
-                        System.out.println("Document id: "+selectedDoc.getId());
-                        selectedDoc.getDestinations().add(recievers.get(0));
-
-                        System.out.println("Added to inbox");
-        } else { */
                         for(String rght: selectedRights) {
                             if(rght.equals("middle man"))
                             {
+
                                 System.out.println("Treating middle man!");
                                 List<Object> aspects = document.getProperty("cmis:secondaryObjectTypeIds").getValues();
 
@@ -335,7 +305,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
                                 System.out.println("Added to inbox");
                             } else {
-
+                                System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
                                 System.out.println("right in progress: " + rght);
                                 List<String> permissions = new ArrayList<String>();
                                 permissions.add("cmis:" + rght);
@@ -347,7 +317,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
                                 System.out.println("Treated right: " + rght);
                             }
                         }
-                   // }
+
 
 
     }
