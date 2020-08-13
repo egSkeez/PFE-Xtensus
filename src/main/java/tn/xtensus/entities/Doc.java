@@ -40,6 +40,7 @@ public class Doc implements Serializable {
     private String mimeType;
     private String creationDate;
 
+
     public Doc() {
     }
 
@@ -152,4 +153,5 @@ public class Doc implements Serializable {
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
     }
+
 }

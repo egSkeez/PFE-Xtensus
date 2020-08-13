@@ -81,6 +81,8 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private Set<Doc> docInbox = new HashSet<Doc>();
     private List<Doc> selectedInbox;
     private Document document;
+    private String checkRights;
+
     @Autowired
     InboxRepository inboxRepository;
     @Autowired
@@ -396,6 +398,35 @@ public class PersonneController implements IPersonneController, Serializable, ID
         return "/docs-details.xhtml?faces-redirect=true";
     }
 
+    public void checkRights()
+    {
+        System.out.println("######################### Check rights Function #########################");
+        checkRights = "";
+
+        session = prem.getCmisSession("admin","admin");
+        OperationContext oc = session.createOperationContext();
+        oc.setIncludeAcls(true);
+        System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
+        Document dc = (Document)session.getObject(selectedDoc.getAlfrescoId(),oc);
+        Acl acl = dc.getAcl();
+        List<Ace> entries = acl.getAces();
+        for (Ace entry : entries) {
+            if (entry.getPrincipalId().equals(nom)) {
+               List<String> pr = entry.getPermissions();
+             for(String permission:pr)
+             {
+                 String[] parts = permission.split(":");
+                 checkRights+=" "+ parts[1];
+
+             }
+                System.out.println("document permissions: "+entry.getPermissions().toString());
+            }
+        }
+
+        session = prem.getCmisSession(nom,password);
+        System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
+    }
+
     public String getNom() {
         return nom;
     }
@@ -567,5 +598,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setDocument(Document document) {
         this.document = document;
+    }
+
+    public String getCheckRights() {
+        return checkRights;
+    }
+
+    public void setCheckRights(String checkRights) {
+        this.checkRights = checkRights;
     }
 }
