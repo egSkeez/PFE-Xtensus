@@ -1,6 +1,7 @@
 package tn.xtensus.controller;
 
 
+import com.sun.syndication.feed.atom.Person;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
@@ -15,6 +16,7 @@ import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.CapabilityAcl;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.aspectj.weaver.patterns.PerObject;
 import org.ocpsoft.rewrite.annotation.Join;
 import org.ocpsoft.rewrite.annotation.RequestAction;
 import org.ocpsoft.rewrite.faces.annotation.Deferred;
@@ -27,9 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 import tn.xtensus.entities.Doc;
 import tn.xtensus.entities.Doc_Person;
 import tn.xtensus.entities.Personne;
+import tn.xtensus.entities.Site;
 import tn.xtensus.repository.DocRepository;
 import tn.xtensus.repository.InboxRepository;
 import tn.xtensus.repository.PersonneRepository;
+import tn.xtensus.repository.SiteRepository;
 import tn.xtensus.service.IDocService;
 import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
@@ -82,7 +86,16 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Doc> selectedInbox;
     private Document document;
     private String checkRights;
-
+    private String siteName;
+    private String siteDescription;
+    private String siteId;
+    private String siteVisibility;
+    private List<Site> allSites;
+    private List<Site> filteredSites;
+    private Site selectedSite;
+    private Set<Personne> siteMembers;
+    @Autowired
+    SiteRepository siteRepository;
     @Autowired
     InboxRepository inboxRepository;
     @Autowired
@@ -97,6 +110,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
      public List<Personne> loadData() {
         System.out.println("Loading people");
        people = iPersonneService.loadData();
+
 
        return people;
 
@@ -397,6 +411,44 @@ public class PersonneController implements IPersonneController, Serializable, ID
         System.out.println("Session properties: "+ session.getSessionParameters().get(SessionParameter.USER));
     }
 
+    public String createSite()
+    {
+        System.out.println("######################### Create site Function #########################");
+        Site site = new Site();
+        site.setNom(siteName);
+        site.setSiteId(siteId);
+        site.setVisibility(siteVisibility);
+        site.setManager(personne);
+        Set<Personne> members = new HashSet<>();
+       members.add(personne);
+        System.out.println("Person id: "+personne.getId());
+        //personne.getSites().add(site);
+        site.setMembers(members);
+       // personneRepository.save(personne);
+        siteRepository.save(site);
+        System.out.println("Site Created");
+        return "all-sites?faces-redirect=true";
+
+
+    }
+
+    public String goToSiteCreation()
+    {
+        return "site-form?faces-redirect=true";
+    }
+    public String goToAllSites()
+    {
+        allSites = (List<Site>)siteRepository.findAll();
+        System.out.println("Sites size: "+allSites.size());
+        return "all-sites?faces-redirect=true";
+    }
+    public String goToSelectedSite()
+    {
+        System.out.println("Site members: "+selectedSite.getMembers().size());
+        siteMembers = selectedSite.getMembers();
+        return "site-details?faces-redirect=true";
+    }
+
     public String getNom() {
         return nom;
     }
@@ -576,5 +628,69 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setCheckRights(String checkRights) {
         this.checkRights = checkRights;
+    }
+
+    public String getSiteName() {
+        return siteName;
+    }
+
+    public void setSiteName(String siteName) {
+        this.siteName = siteName;
+    }
+
+    public String getSiteDescription() {
+        return siteDescription;
+    }
+
+    public void setSiteDescription(String siteDescription) {
+        this.siteDescription = siteDescription;
+    }
+
+    public String getSiteId() {
+        return siteId;
+    }
+
+    public void setSiteId(String siteId) {
+        this.siteId = siteId;
+    }
+
+    public String getSiteVisibility() {
+        return siteVisibility;
+    }
+
+    public void setSiteVisibility(String siteVisibility) {
+        this.siteVisibility = siteVisibility;
+    }
+
+    public List<Site> getAllSites() {
+        return allSites;
+    }
+
+    public void setAllSites(List<Site> allSites) {
+        this.allSites = allSites;
+    }
+
+    public List<Site> getFilteredSites() {
+        return filteredSites;
+    }
+
+    public void setFilteredSites(List<Site> filteredSites) {
+        this.filteredSites = filteredSites;
+    }
+
+    public Site getSelectedSite() {
+        return selectedSite;
+    }
+
+    public void setSelectedSite(Site selectedSite) {
+        this.selectedSite = selectedSite;
+    }
+
+    public Set<Personne> getSiteMembers() {
+        return siteMembers;
+    }
+
+    public void setSiteMembers(Set<Personne> siteMembers) {
+        this.siteMembers = siteMembers;
     }
 }

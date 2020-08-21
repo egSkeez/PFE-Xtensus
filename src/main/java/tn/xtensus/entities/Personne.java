@@ -17,6 +17,8 @@ public class Personne implements Serializable {
     private String nom;
     private String prenom;
     private String password;
+    @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Site> mySites;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user",fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -27,6 +29,9 @@ public class Personne implements Serializable {
     private List<Doc> docs;
     @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "destinations")
     private Set<Doc> inbox = new HashSet<>();
+
+    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "members")
+    private Set<Site> sites;
 
     public Personne() {
     }
@@ -93,5 +98,13 @@ public class Personne implements Serializable {
 
     public void setUserGroups(Set<Doc_Person> userGroups) {
         this.userGroups = userGroups;
+    }
+
+    public Set<Site> getSites() {
+        return sites;
+    }
+
+    public void setSites(Set<Site> sites) {
+        this.sites = sites;
     }
 }
