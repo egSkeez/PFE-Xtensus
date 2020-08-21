@@ -13,8 +13,7 @@
 <ui:define name="content">
 
 	<section class="section about-section gray-bg" id="about">
-		<h:form>
-		<p:commandButton value="Add users" action="#{personneController.goToAddMembers}" />
+		<h5>Site Visitor</h5>
 		<p:dataTable var="personne"
 					 value="#{personneController.siteMembers}">
 			<p:column headerText="Name">
@@ -24,13 +23,8 @@
 			<p:column headerText="Last name">
 				<h:outputText value="#{personne.prenom}"/>
 			</p:column>
-			<p:column>
-				<p:commandButton value="View" action="#{personneController.addMember}" >
-					<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToAdd}" />
-				</p:commandButton>
-			</p:column>
 		</p:dataTable>
-		</h:form>
+
 	</section>
 
 </ui:define>

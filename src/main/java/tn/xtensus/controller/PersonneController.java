@@ -94,6 +94,10 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Site> filteredSites;
     private Site selectedSite;
     private Set<Personne> siteMembers;
+    private Personne personToAdd;
+    private Set<Personne> peopleToAdd = new HashSet<>();
+    private String chosenRole;
+
     @Autowired
     SiteRepository siteRepository;
     @Autowired
@@ -446,7 +450,25 @@ public class PersonneController implements IPersonneController, Serializable, ID
     {
         System.out.println("Site members: "+selectedSite.getMembers().size());
         siteMembers = selectedSite.getMembers();
-        return "site-details?faces-redirect=true";
+        if(selectedSite.getManager().getId()==personne.getId())
+        {
+            return "site-details?faces-redirect=true";
+        }else
+            return "site-visitor?faces-redirect=true";
+
+
+    }
+    public String goToAddMembers()
+    {
+
+        return "site-addmembers?faces-redirect=true";
+    }
+    public void addMembers()
+    {
+        System.out.println("######################### Add member Function #########################");
+        System.out.println("selected person: "+personToAdd.getNom());
+        peopleToAdd.add(personToAdd);
+        System.out.println("People to add size: " +peopleToAdd.size());
     }
 
     public String getNom() {
@@ -692,5 +714,29 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setSiteMembers(Set<Personne> siteMembers) {
         this.siteMembers = siteMembers;
+    }
+
+    public Personne getPersonToAdd() {
+        return personToAdd;
+    }
+
+    public void setPersonToAdd(Personne personToAdd) {
+        this.personToAdd = personToAdd;
+    }
+
+    public Set<Personne> getPeopleToAdd() {
+        return peopleToAdd;
+    }
+
+    public void setPeopleToAdd(Set<Personne> peopleToAdd) {
+        this.peopleToAdd = peopleToAdd;
+    }
+
+    public String getChosenRole() {
+        return chosenRole;
+    }
+
+    public void setChosenRole(String chosenRole) {
+        this.chosenRole = chosenRole;
     }
 }
