@@ -26,12 +26,13 @@
 				<h:outputText value="#{personne.prenom}" />
 			</p:column>
 			<p:column>
-				<p:commandButton value="Add" action="#{personneController.addMembers}" update=":roletable" >
+				<p:commandButton value="Add" action="#{personneController.addMembers}" update=":roleform:roletable" >
 					<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToAdd}" />
 				</p:commandButton>
 			</p:column>
 		</p:dataTable>
 		</h:form>
+		<h:form id="roleform">
 		<p:dataTable id="roletable" var="personne" value="#{personneController.peopleToAdd}" >
 			<p:column headerText="Name">
 				<h:outputText value="#{personne.nom}" />
@@ -40,7 +41,7 @@
 			<p:column headerText="Choose role" >
 				<p:outputLabel for="@next"  />
 				<p:selectOneMenu id="console" value="#{personneController.chosenRole}" style="width:300px">
-					<f:selectItem itemLabel="Select One" itemValue="" />
+					<f:selectItem itemLabel="Select One" itemValue="None" />
 					<f:selectItem itemLabel="Collaborator" itemValue="collaborator" />
 					<f:selectItem itemLabel="Contributor" itemValue="contributor" />
 					<f:selectItem itemLabel="Visitor" itemValue="visitor" />
@@ -52,7 +53,23 @@
 			</p:column>
 		</p:dataTable>
 			<p:commandButton value="Confirm" action="#{personneController.confirmAdd}" />
+		</h:form>
 
+		<p:dataTable id="current_users" var="personne"
+					 value="#{personneController.membersBySite}">
+			<p:column headerText="Name">
+				<h:outputText value="#{personne.nom}"/>
+			</p:column>
+
+			<p:column headerText="Last name">
+				<h:outputText value="#{personne.prenom}"/>
+			</p:column>
+			<p:column>
+				<p:commandButton value="Delete" action="#{personneController.deleteMember}" update=":current_users">
+					<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToDelete}" />
+				</p:commandButton>
+			</p:column>
+		</p:dataTable>
 	</section>
 
 </ui:define>

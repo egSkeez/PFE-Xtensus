@@ -14,7 +14,7 @@
 
 	<section class="section about-section gray-bg" id="about">
 		<h:form>
-		<p:commandButton value="Add users" action="#{personneController.goToAddMembers}" />
+		<p:commandButton value="Manage users" action="#{personneController.goToAddMembers}" />
 		<p:dataTable var="personne"
 					 value="#{personneController.membersBySite}">
 			<p:column headerText="Name">
@@ -25,7 +25,7 @@
 				<h:outputText value="#{personne.prenom}"/>
 			</p:column>
 			<p:column>
-				<p:commandButton value="Delete" action="#{personneController.addMember}" >
+				<p:commandButton value="Delete" action="#{personneController.deleteMember}" >
 					<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToAdd}" />
 				</p:commandButton>
 			</p:column>

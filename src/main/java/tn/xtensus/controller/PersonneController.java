@@ -93,6 +93,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private Set<Personne> peopleToAdd = new HashSet<>();
     private String chosenRole;
     private Set<Personne> membersBySite = new HashSet<>();
+    private Personne personToDelete;
 
     @Autowired
     MemberRepository memberRepository;
@@ -499,6 +500,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 System.out.println("Confirming adding user: " + per.getNom() + " to Site: " + selectedSite.getNom());
                 Member member = new Member();
                 member.setUser(per);
+                System.out.println("Chosen Role: "+chosenRole);
                 member.setRole(chosenRole);
                 member.setSite(selectedSite);
                 memberRepository.save(member);
@@ -511,7 +513,21 @@ public class PersonneController implements IPersonneController, Serializable, ID
         {
             System.out.println("Member name: "+m.getNom());
         }
-        return "site-details?faces-redirect=true";
+        peopleToAdd.removeAll(peopleToAdd);
+        return "site-addmembers?faces-redirect=true";
+    }
+    public void deleteMember()
+    {
+        for (Member m:siteMembers)
+        {
+            if(m.getUser().getId() == personToDelete.getId())
+            {
+                memberRepository.delete(m);
+                System.out.println("Removing user: "+personToDelete.getNom());
+
+            }
+        }
+        retrieveMembers();
     }
 
     public String getNom() {
@@ -789,5 +805,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setMembersBySite(Set<Personne> membersBySite) {
         this.membersBySite = membersBySite;
+    }
+
+    public Personne getPersonToDelete() {
+        return personToDelete;
+    }
+
+    public void setPersonToDelete(Personne personToDelete) {
+        this.personToDelete = personToDelete;
     }
 }
