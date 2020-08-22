@@ -16,6 +16,7 @@
 		<h:form id="allsites"  class="login100-form validate-form">
 		<div class="main-card mb-3 card">
 			<div class="card-body"><h5 class="card-title">Sites</h5>
+
 				<p:dataTable var="site" value="#{personneController.allSites}"  >
 					<p:column headerText="Id" style="width:45px;">
 						<h:outputText value="#{site.id}" />
@@ -34,9 +35,10 @@
 					</p:column>
 				</p:dataTable>
 
+
 			</div>
 		</div>
-		</h:form>
+	</h:form>
 
 
 

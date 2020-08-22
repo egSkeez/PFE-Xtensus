@@ -26,14 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import tn.xtensus.entities.Doc;
-import tn.xtensus.entities.Doc_Person;
-import tn.xtensus.entities.Personne;
-import tn.xtensus.entities.Site;
-import tn.xtensus.repository.DocRepository;
-import tn.xtensus.repository.InboxRepository;
-import tn.xtensus.repository.PersonneRepository;
-import tn.xtensus.repository.SiteRepository;
+import tn.xtensus.entities.*;
+import tn.xtensus.repository.*;
 import tn.xtensus.service.IDocService;
 import tn.xtensus.service.IPersonneService;
 import org.ocpsoft.rewrite.el.ELBeanName;
@@ -52,6 +46,7 @@ import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 
 import static java.lang.Integer.getInteger;
 import static java.lang.Integer.valueOf;
@@ -93,11 +88,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private List<Site> allSites;
     private List<Site> filteredSites;
     private Site selectedSite;
-    private Set<Personne> siteMembers;
+    private Set<Member> siteMembers;
     private Personne personToAdd;
     private Set<Personne> peopleToAdd = new HashSet<>();
     private String chosenRole;
+    private Set<Personne> membersBySite = new HashSet<>();
 
+    @Autowired
+    MemberRepository memberRepository;
     @Autowired
     SiteRepository siteRepository;
     @Autowired
@@ -423,14 +421,16 @@ public class PersonneController implements IPersonneController, Serializable, ID
         site.setSiteId(siteId);
         site.setVisibility(siteVisibility);
         site.setManager(personne);
-        Set<Personne> members = new HashSet<>();
-       members.add(personne);
+        Map<String,Personne> members = new HashMap<String,Personne>();
+       members.put("manager",personne);
         System.out.println("Person id: "+personne.getId());
         //personne.getSites().add(site);
-        site.setMembers(members);
+        //site.setMembers(members);
        // personneRepository.save(personne);
         siteRepository.save(site);
+        allSites = (List<Site>)siteRepository.findAll();
         System.out.println("Site Created");
+
         return "all-sites?faces-redirect=true";
 
 
@@ -446,11 +446,23 @@ public class PersonneController implements IPersonneController, Serializable, ID
         System.out.println("Sites size: "+allSites.size());
         return "all-sites?faces-redirect=true";
     }
+    public Set<Personne> retrieveMembers()
+    {
+        membersBySite.removeAll(membersBySite);
+        siteMembers = memberRepository.getMembersBySite(selectedSite.getId());
+        for (Member mm: siteMembers)
+        {
+            if(mm.getSite().getId()== selectedSite.getId())
+                System.out.println("Retrieving member: "+mm.getUser().getNom());
+            membersBySite.add(mm.getUser());
+        }
+        return membersBySite;
+    }
     public String goToSelectedSite()
     {
-        System.out.println("Site members: "+selectedSite.getMembers().size());
-        siteMembers = selectedSite.getMembers();
-        if(selectedSite.getManager().getId()==personne.getId())
+        System.out.println("######################### Navigation Function #########################");
+       retrieveMembers();
+        if(selectedSite.getManager() != null && selectedSite.getManager().getId()==personne.getId())
         {
             return "site-details?faces-redirect=true";
         }else
@@ -458,17 +470,48 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
 
     }
+
     public String goToAddMembers()
     {
 
         return "site-addmembers?faces-redirect=true";
     }
+
     public void addMembers()
     {
         System.out.println("######################### Add member Function #########################");
         System.out.println("selected person: "+personToAdd.getNom());
         peopleToAdd.add(personToAdd);
         System.out.println("People to add size: " +peopleToAdd.size());
+    }
+
+    public String confirmAdd()
+    {
+        System.out.println("######################### Confirm add Function #########################");
+        membersBySite=retrieveMembers();
+        for(Personne per:peopleToAdd)
+        {
+            System.out.println("Testing on: "+per.getNom());
+            if(membersBySite.contains(per)){
+                System.out.println("User is already a member !!!");
+
+            }else {
+                System.out.println("Confirming adding user: " + per.getNom() + " to Site: " + selectedSite.getNom());
+                Member member = new Member();
+                member.setUser(per);
+                member.setRole(chosenRole);
+                member.setSite(selectedSite);
+                memberRepository.save(member);
+                System.out.println("Conifrmation complete !");
+            }
+
+        }
+     membersBySite=retrieveMembers();
+        for (Personne m:membersBySite)
+        {
+            System.out.println("Member name: "+m.getNom());
+        }
+        return "site-details?faces-redirect=true";
     }
 
     public String getNom() {
@@ -708,11 +751,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
         this.selectedSite = selectedSite;
     }
 
-    public Set<Personne> getSiteMembers() {
+    public Set<Member> getSiteMembers() {
         return siteMembers;
     }
 
-    public void setSiteMembers(Set<Personne> siteMembers) {
+    public void setSiteMembers(Set<Member> siteMembers) {
         this.siteMembers = siteMembers;
     }
 
@@ -738,5 +781,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setChosenRole(String chosenRole) {
         this.chosenRole = chosenRole;
+    }
+
+    public Set<Personne> getMembersBySite() {
+        return membersBySite;
+    }
+
+    public void setMembersBySite(Set<Personne> membersBySite) {
+        this.membersBySite = membersBySite;
     }
 }

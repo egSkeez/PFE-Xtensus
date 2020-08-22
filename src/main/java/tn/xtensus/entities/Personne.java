@@ -24,14 +24,16 @@ public class Personne implements Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Doc_Person> userGroups = new HashSet<Doc_Person>();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user",fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Member> siteMemberships = new HashSet<Member>();
+
 
     @OneToMany(mappedBy = "expediteur", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Doc> docs;
     @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "destinations")
     private Set<Doc> inbox = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch=FetchType.EAGER,mappedBy = "members")
-    private Set<Site> sites;
 
     public Personne() {
     }
@@ -100,11 +102,21 @@ public class Personne implements Serializable {
         this.userGroups = userGroups;
     }
 
-    public Set<Site> getSites() {
-        return sites;
+
+
+    public Set<Site> getMySites() {
+        return mySites;
     }
 
-    public void setSites(Set<Site> sites) {
-        this.sites = sites;
+    public void setMySites(Set<Site> mySites) {
+        this.mySites = mySites;
+    }
+
+    public Set<Member> getSiteMemberships() {
+        return siteMemberships;
+    }
+
+    public void setSiteMemberships(Set<Member> siteMemberships) {
+        this.siteMemberships = siteMemberships;
     }
 }

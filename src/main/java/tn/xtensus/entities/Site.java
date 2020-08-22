@@ -1,9 +1,12 @@
 package tn.xtensus.entities;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 public class Site implements Serializable {
@@ -15,13 +18,9 @@ public class Site implements Serializable {
     private String siteId;
     @ManyToOne
     private Personne manager;
-    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "Site_Member",
-            joinColumns = { @JoinColumn(name = "site_id",referencedColumnName ="id") },
-            inverseJoinColumns = { @JoinColumn(name = "person_id",referencedColumnName ="id") }
-    )
-    private Set<Personne> members;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "site",fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<Member> members = new HashSet<Member>();
     @Column
     @ElementCollection(targetClass=Doc.class)
     private Set<Doc> content;
@@ -32,7 +31,7 @@ public class Site implements Serializable {
     public Site() {
     }
 
-    public Site(String nom, Set<Personne> members, Set<Doc> content, List<String> activities) {
+    public Site(String nom, Set<Member> members, Set<Doc> content, List<String> activities) {
         this.nom = nom;
         this.members = members;
         this.content = content;
@@ -55,11 +54,11 @@ public class Site implements Serializable {
         this.nom = nom;
     }
 
-    public Set<Personne> getMembers() {
+    public Set<Member> getMembers() {
         return members;
     }
 
-    public void setMembers(Set<Personne> members) {
+    public void setMembers(Set<Member> members) {
         this.members = members;
     }
 
