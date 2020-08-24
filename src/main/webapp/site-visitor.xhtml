@@ -17,11 +17,11 @@
 		<p:dataTable var="personne"
 					 value="#{personneController.siteMembers}">
 			<p:column headerText="Name">
-				<h:outputText value="#{personne.nom}"/>
+				<h:outputText value="#{personne.user.nom}"/>
 			</p:column>
 
 			<p:column headerText="Last name">
-				<h:outputText value="#{personne.prenom}"/>
+				<h:outputText value="#{personne.user.prenom}"/>
 			</p:column>
 		</p:dataTable>
 

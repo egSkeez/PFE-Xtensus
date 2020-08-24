@@ -13,7 +13,7 @@
 <ui:define name="content">
 
 	<section class="section about-section gray-bg" id="about">
-		<h5>You are the site manager!</h5>
+		<h5>You are the site collaborator!</h5>
 		<h:form>
 		<p:commandButton value="Manage users" action="#{personneController.goToAddMembers}" />
 		<p:dataTable var="personne"
@@ -87,14 +87,6 @@
 			<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
 				<h:outputText value="Download complete !" />
 			</p:dialog>
-			<p:growl id="message" showDetail="true" />
-			<p:commandButton value="Delete" action="#{personneController.deleteFromSite}" update="message" >
-				<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
-			</p:commandButton>
-			<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
-				<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
-				<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
-			</p:confirmDialog>
 		</h:form>
 		<h:form enctype="multipart/form-data" id="uploadforsite">
 			<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>

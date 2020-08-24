@@ -17,6 +17,8 @@ public class Doc implements Serializable {
     private int id;
     private String alfrescoId;
     private String nom;
+    @ManyToOne
+    private Site site;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "doc",fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -154,4 +156,11 @@ public class Doc implements Serializable {
         this.creationDate = creationDate;
     }
 
+    public Site getSite() {
+        return site;
+    }
+
+    public void setSite(Site site) {
+        this.site = site;
+    }
 }

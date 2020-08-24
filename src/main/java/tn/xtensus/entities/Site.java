@@ -27,6 +27,8 @@ public class Site implements Serializable {
     @Column
     @ElementCollection(targetClass=String.class)
     private List<String> activities;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "site",fetch = FetchType.EAGER,  orphanRemoval = true)
+    private Set<Doc> documents;
 
     public Site() {
     }
@@ -100,5 +102,13 @@ public class Site implements Serializable {
 
     public void setVisibility(String visibility) {
         this.visibility = visibility;
+    }
+
+    public Set<Doc> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(Set<Doc> documents) {
+        this.documents = documents;
     }
 }

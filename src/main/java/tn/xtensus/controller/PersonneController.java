@@ -94,6 +94,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private String chosenRole;
     private Set<Personne> membersBySite = new HashSet<>();
     private Personne personToDelete;
+    private Set<Doc> siteDocuments;
 
     @Autowired
     MemberRepository memberRepository;
@@ -461,10 +462,12 @@ public class PersonneController implements IPersonneController, Serializable, ID
     }
     public String goToSelectedSite()
     {
-        System.out.println("######################### Navigation Function #########################");
+        System.out.println("######################### Navigation to se Function #########################");
        retrieveMembers();
         if(selectedSite.getManager() != null && selectedSite.getManager().getId()==personne.getId())
         {
+            siteDocuments = selectedSite.getDocuments();
+            System.out.println("Site has "+siteDocuments.size()+" documents!");
             return "site-details?faces-redirect=true";
         }else
             return "site-visitor?faces-redirect=true";
@@ -528,6 +531,111 @@ public class PersonneController implements IPersonneController, Serializable, ID
             }
         }
         retrieveMembers();
+    }
+
+    public void uploadForSite() {
+        System.out.println("######################### Upload File to site triggered #########################");
+        Doc dbDoc = new Doc();
+
+
+        if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
+                .equals(CapabilityAcl.MANAGE)) {
+            System.out.println("Le GED ne supporte pas les ACL");
+        } else {
+            System.out.println("Le GED supporte les ACL");
+
+            System.out.println("The file's name is: " + file.getFileName());
+            BigInteger bi;
+            bi = BigInteger.valueOf(file.getSize());
+            HashMap<String, Object> newFileProps = new HashMap<String, Object>();
+            ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
+                    "application/octet-stream", new ByteArrayInputStream(file.getContents()));
+
+
+            //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            newFileProps.put(PropertyIds.NAME, file.getFileName());
+            newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/")).createDocument(newFileProps,
+                    contentStream,
+                    VersioningState.MAJOR);
+            for (Member m : siteMembers) {
+                Personne prs = personneRepository.findById(m.getUser().getId()).get();
+                System.out.println("Session properties: " + session.getSessionParameters().get(SessionParameter.USER));
+                System.out.println("Member in progress: " + prs.getNom());
+                List<String> permissions = new ArrayList<String>();
+                String role = m.getRole();
+                if (role.equals("Consumer")) {
+                    System.out.println("User is a consumer!");
+                    permissions.add("cmis:read");
+                } else if (role.equals("Contributor")) {
+                    System.out.println("User is a contributor!");
+                    permissions.add("cmis:read");
+                    permissions.add("cmis:write");
+                } else if (role.equals("Collaborator")) {
+                    System.out.println("User is a collaborator!");
+                    permissions.add("cmis:all");
+                }
+                String principal = m.getUser().getNom();
+                Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                List<Ace> aceListIn = new ArrayList<Ace>();
+                aceListIn.add(aceIn);
+                testDoc.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
+                testDoc.refresh();
+                System.out.println("Gave user " + prs.getNom() + " "+m.getRole()+" rights !");
+
+                OperationContext operationContext = new OperationContextImpl();
+                operationContext.setIncludeAcls(true);
+                testDoc = (Document) session.getObject(testDoc, operationContext);
+                System.out.println("l'id du document est: " + testDoc.getId());
+                testDoc.refresh();
+            }
+            dbDoc.setAlfrescoId(testDoc.getId());
+            dbDoc.setNom(file.getFileName());
+            dbDoc.setExpediteur(personne);
+            dbDoc.setAuthor(testDoc.getCreatedBy());
+            dbDoc.setSite(selectedSite);
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            dbDoc.setCreationDate(dtf.format(now));
+            dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable").toString());
+            dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType").toString());
+            dbDoc.setModificationDate(dtf.format(now));
+            dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel").toString());
+            docRepository.save(dbDoc);
+            System.out.println("Document added to Database !");
+
+        }
+    }
+
+    public String goToMySites()
+    {
+        System.out.println("######################### Navigation to my sites #########################");
+        allSites = (List<Site>)siteRepository.findAll();
+        List<Site> mySites = new ArrayList<>();
+        for(Site site: allSites)
+        {
+            if(site.getManager().getNom().equals(personne.getNom()))
+                mySites.add(site);
+        }
+        allSites=mySites;
+        return "all-sites?faces-redirect=true";
+    }
+    @Transactional
+    public String deleteFromSite() {
+        System.out.println("######################### Delete function started #########################");
+        docRepository.delete(selectedDoc);
+        //personne.getDocs().remove(selectedDoc);
+        selectedSite.getDocuments().remove(selectedDoc);
+        siteRepository.save(selectedSite);
+        System.out.println("Deleted file: "+selectedDoc.getNom()+" from the database");
+        Document doc =(Document) session.getObject(selectedDoc.getAlfrescoId());
+        doc.delete();
+        docs.remove(selectedDoc);
+        System.out.println("Deleted file: "+selectedDoc.getNom()+" from alfresco");
+
+        System.out.println("Updating "+personne.getNom());
+        personneRepository.save(personne);
+        return "/docs-list.xhtml?faces-redirect=true";
     }
 
     public String getNom() {
@@ -813,5 +921,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setPersonToDelete(Personne personToDelete) {
         this.personToDelete = personToDelete;
+    }
+
+    public Set<Doc> getSiteDocuments() {
+        return siteDocuments;
+    }
+
+    public void setSiteDocuments(Set<Doc> siteDocuments) {
+        this.siteDocuments = siteDocuments;
     }
 }

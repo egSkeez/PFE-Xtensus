@@ -43,7 +43,7 @@
 	</h:form>
 	<h:form enctype="multipart/form-data" id="uploadform">
 		<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>
-		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadFile}"
+		<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadForSite}"
 						 disabled="false" />
 	</h:form>
 </ui:define>
