@@ -95,6 +95,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private Set<Personne> membersBySite = new HashSet<>();
     private Personne personToDelete;
     private Set<Doc> siteDocuments;
+    private Set<String> siteActivities;
 
     @Autowired
     MemberRepository memberRepository;
@@ -363,7 +364,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
             } catch (IOException e) {
                 throw new RuntimeException(e.getLocalizedMessage());
             }
-
+        LocalDateTime date = LocalDateTime.now();
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        String formattedDate = date.format(myFormatObj);
+        Set<String> act=  selectedSite.getActivities();
+        act.add(personne.getNom()+"download file "+selectedDoc.getNom()+" at "+formattedDate);
+        selectedSite.setActivities(act);
+        siteRepository.save(selectedSite);
+        siteActivities = selectedSite.getActivities();
     }
 
     public String doLogout()
@@ -462,17 +470,29 @@ public class PersonneController implements IPersonneController, Serializable, ID
     }
     public String goToSelectedSite()
     {
-        System.out.println("######################### Navigation to se Function #########################");
-       retrieveMembers();
+        System.out.println("######################### Navigation to selected site Function #########################");
+        String navigation="";
+        Member connectedMember = new Member();
+        siteMembers = memberRepository.getMembersBySite(selectedSite.getId());
+        siteActivities = selectedSite.getActivities();
+       for(Member m: siteMembers)
+       {
+           if(m.getUser().getId()==personne.getId())
+               connectedMember = m;
+       }
         if(selectedSite.getManager() != null && selectedSite.getManager().getId()==personne.getId())
         {
             siteDocuments = selectedSite.getDocuments();
             System.out.println("Site has "+siteDocuments.size()+" documents!");
-            return "site-details?faces-redirect=true";
-        }else
-            return "site-visitor?faces-redirect=true";
+            navigation=  "site-details?faces-redirect=true";
+        }else if(selectedSite.getManager() != null && connectedMember.getRole().equals("Collaborator"))
+            navigation=  "site-collaborator?faces-redirect=true";
+        else if(selectedSite.getManager() != null && connectedMember.getRole().equals("Contributor"))
+            navigation=  "site-contributor?faces-redirect=true";
+        else if(selectedSite.getManager() != null && connectedMember.getRole().equals("Consumer"))
+            navigation= "site-consumer?faces-redirect=true";
 
-
+        return navigation;
     }
 
     public String goToAddMembers()
@@ -493,6 +513,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     {
         System.out.println("######################### Confirm add Function #########################");
         membersBySite=retrieveMembers();
+        Member member = new Member();
         for(Personne per:peopleToAdd)
         {
             System.out.println("Testing on: "+per.getNom());
@@ -501,14 +522,56 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
             }else {
                 System.out.println("Confirming adding user: " + per.getNom() + " to Site: " + selectedSite.getNom());
-                Member member = new Member();
+
                 member.setUser(per);
                 System.out.println("Chosen Role: "+chosenRole);
                 member.setRole(chosenRole);
                 member.setSite(selectedSite);
                 memberRepository.save(member);
                 System.out.println("Conifrmation complete !");
+                if(selectedSite.getDocuments()!=null)
+                {
+                    for(Doc dc: selectedSite.getDocuments())
+                    {
+                        List<String> permissions = new ArrayList<String>();
+                        String role = member.getRole();
+                        if (role.equals("Consumer")) {
+                            System.out.println("User is a consumer!");
+                            permissions.add("cmis:read");
+                        } else if (role.equals("Contributor")) {
+                            System.out.println("User is a contributor!");
+                            permissions.add("cmis:read");
+                            permissions.add("cmis:write");
+                        } else if (role.equals("Collaborator")) {
+                            System.out.println("User is a collaborator!");
+                            permissions.add("cmis:all");
+                        }
+                        Document testDoc = (Document)session.getObject(dc.getAlfrescoId());
+                        String principal = member.getUser().getNom();
+                        Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                        List<Ace> aceListIn = new ArrayList<Ace>();
+                        aceListIn.add(aceIn);
+                        testDoc.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
+                        testDoc.refresh();
+                        System.out.println("Gave user " + per.getNom() + " "+member.getRole()+" rights !");
+
+                        OperationContext operationContext = new OperationContextImpl();
+                        operationContext.setIncludeAcls(true);
+                        testDoc = (Document) session.getObject(testDoc, operationContext);
+                        System.out.println("l'id du document est: " + testDoc.getId());
+                        testDoc.refresh();
+                    }
+                }
+                LocalDateTime date = LocalDateTime.now();
+                DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                String formattedDate = date.format(myFormatObj);
+               Set<String> act=  selectedSite.getActivities();
+                act.add(personne.getNom()+" added user "+per.getNom()+" at "+formattedDate);
+                selectedSite.setActivities(act);
+                siteRepository.save(selectedSite);
+                siteActivities = selectedSite.getActivities();
             }
+
 
         }
      membersBySite=retrieveMembers();
@@ -527,7 +590,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
             {
                 memberRepository.delete(m);
                 System.out.println("Removing user: "+personToDelete.getNom());
-
+                LocalDateTime date = LocalDateTime.now();
+                DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                String formattedDate = date.format(myFormatObj);
+                Set<String> act=  selectedSite.getActivities();
+                act.add(personne.getNom()+" Deleted user "+personToDelete.getNom()+" from the site at "+formattedDate);
+                selectedSite.setActivities(act);
+                siteRepository.save(selectedSite);
+                siteActivities = selectedSite.getActivities();
             }
         }
         retrieveMembers();
@@ -603,7 +673,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
             dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel").toString());
             docRepository.save(dbDoc);
             System.out.println("Document added to Database !");
-
+            LocalDateTime date = LocalDateTime.now();
+            DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+            String formattedDate = date.format(myFormatObj);
+            Set<String> act=  selectedSite.getActivities();
+            act.add(personne.getNom()+" uploaded file "+selectedDoc.getNom()+" at "+formattedDate);
+            selectedSite.setActivities(act);
+            siteRepository.save(selectedSite);
+            siteActivities = selectedSite.getActivities();
         }
     }
 
@@ -635,6 +712,14 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
         System.out.println("Updating "+personne.getNom());
         personneRepository.save(personne);
+        LocalDateTime date = LocalDateTime.now();
+        DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        String formattedDate = date.format(myFormatObj);
+        Set<String> act=  selectedSite.getActivities();
+        act.add(personne.getNom()+" deleted file "+selectedDoc.getNom()+" at "+formattedDate);
+        selectedSite.setActivities(act);
+        siteRepository.save(selectedSite);
+        siteActivities = selectedSite.getActivities();
         return "/docs-list.xhtml?faces-redirect=true";
     }
 
@@ -929,5 +1014,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setSiteDocuments(Set<Doc> siteDocuments) {
         this.siteDocuments = siteDocuments;
+    }
+
+    public Set<String> getSiteActivities() {
+        return siteActivities;
+    }
+
+    public void setSiteActivities(Set<String> siteActivities) {
+        this.siteActivities = siteActivities;
     }
 }

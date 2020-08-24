@@ -101,6 +101,12 @@
 			<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadForSite}"
 							 disabled="false" />
 		</h:form>
+		<p:dataTable var="activity"
+					 value="#{personneController.siteActivities}">
+			<p:column headerText="News feed">
+				<h:outputText value="#{activity}"/>
+			</p:column>
+		</p:dataTable>
 	</section>
 
 </ui:define>

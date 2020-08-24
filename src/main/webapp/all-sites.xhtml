@@ -28,6 +28,9 @@
 					<p:column headerText="Site name" >
 						<h:outputText value="#{site.nom}" />
 					</p:column>
+					<p:column headerText="Status" >
+						<h:outputText value="#{site.visibility}" />
+					</p:column>
 					<p:column>
 						<p:commandButton value="View" action="#{personneController.goToSelectedSite}" >
 						<f:setPropertyActionListener value="#{site}" target="#{personneController.selectedSite}" />

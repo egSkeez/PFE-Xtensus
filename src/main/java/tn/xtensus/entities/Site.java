@@ -18,22 +18,22 @@ public class Site implements Serializable {
     private String siteId;
     @ManyToOne
     private Personne manager;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "site",fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "site",fetch = FetchType.LAZY, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<Member> members = new HashSet<Member>();
     @Column
     @ElementCollection(targetClass=Doc.class)
     private Set<Doc> content;
     @Column
-    @ElementCollection(targetClass=String.class)
-    private List<String> activities;
+    @ElementCollection(targetClass=String.class, fetch=FetchType.EAGER)
+    private Set<String> activities;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "site",fetch = FetchType.EAGER,  orphanRemoval = true)
     private Set<Doc> documents;
 
     public Site() {
     }
 
-    public Site(String nom, Set<Member> members, Set<Doc> content, List<String> activities) {
+    public Site(String nom, Set<Member> members, Set<Doc> content, Set<String> activities) {
         this.nom = nom;
         this.members = members;
         this.content = content;
@@ -72,11 +72,11 @@ public class Site implements Serializable {
         this.content = content;
     }
 
-    public List<String> getActivities() {
+    public Set<String> getActivities() {
         return activities;
     }
 
-    public void setActivities(List<String> activities) {
+    public void setActivities(Set<String> activities) {
         this.activities = activities;
     }
 
