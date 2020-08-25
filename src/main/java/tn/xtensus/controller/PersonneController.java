@@ -625,7 +625,12 @@ public class PersonneController implements IPersonneController, Serializable, ID
             //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             newFileProps.put(PropertyIds.NAME, file.getFileName());
             newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/")).createDocument(newFileProps,
+            List<String> secondary = new ArrayList<>();
+            secondary.add("P:cm:titled");
+            newFileProps.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondary);
+            newFileProps.put("cm:title", selectedSite.getManager().getNom()+" is the site Manager");
+            newFileProps.put("cm:description", selectedSite.getNom());
+            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/Sites")).createDocument(newFileProps,
                     contentStream,
                     VersioningState.MAJOR);
             for (Member m : siteMembers) {
@@ -677,7 +682,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
             DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
             String formattedDate = date.format(myFormatObj);
             Set<String> act=  selectedSite.getActivities();
-            act.add(personne.getNom()+" uploaded file "+selectedDoc.getNom()+" at "+formattedDate);
+            act.add(personne.getNom()+" uploaded file "+testDoc.getName()+" at "+formattedDate);
             selectedSite.setActivities(act);
             siteRepository.save(selectedSite);
             siteActivities = selectedSite.getActivities();
