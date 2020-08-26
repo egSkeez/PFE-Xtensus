@@ -439,6 +439,11 @@ public class PersonneController implements IPersonneController, Serializable, ID
        // personneRepository.save(personne);
         siteRepository.save(site);
         allSites = (List<Site>)siteRepository.findAll();
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put(PropertyIds.NAME, siteName);
+        properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+        Folder sharedFolder = (Folder) session.getObjectByPath("/Partagé/Sites/");
+        sharedFolder.createFolder(properties);
         System.out.println("Site Created");
 
         return "all-sites?faces-redirect=true";
@@ -621,7 +626,9 @@ public class PersonneController implements IPersonneController, Serializable, ID
             ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
                     "application/octet-stream", new ByteArrayInputStream(file.getContents()));
 
-
+            Map<String, Object> properties = new HashMap<String, Object>();
+            properties.put(PropertyIds.NAME, selectedSite.getNom());
+            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
             //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
             newFileProps.put(PropertyIds.NAME, file.getFileName());
             newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
@@ -630,9 +637,13 @@ public class PersonneController implements IPersonneController, Serializable, ID
             newFileProps.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondary);
             newFileProps.put("cm:title", selectedSite.getManager().getNom()+" is the site Manager");
             newFileProps.put("cm:description", selectedSite.getNom());
-            Document testDoc = ((Folder) session.getObjectByPath("/Partagé/Sites")).createDocument(newFileProps,
-                    contentStream,
-                    VersioningState.MAJOR);
+
+                Folder siteFolder = (Folder) session.getObjectByPath("/Partagé/Sites/"+selectedSite.getNom());
+                siteFolderAcess(siteFolder);
+                Document testDoc = siteFolder.createDocument(newFileProps,
+                        contentStream,
+                        VersioningState.MAJOR);
+
             for (Member m : siteMembers) {
                 Personne prs = personneRepository.findById(m.getUser().getId()).get();
                 System.out.println("Session properties: " + session.getSessionParameters().get(SessionParameter.USER));
@@ -687,6 +698,41 @@ public class PersonneController implements IPersonneController, Serializable, ID
             siteRepository.save(selectedSite);
             siteActivities = selectedSite.getActivities();
         }
+    }
+
+    public void siteFolderAcess(Folder siteFolder)
+    {
+        System.out.println("######################### Giving access to site folder #########################");
+        System.out.println("Started Admin session !");
+        session = prem.getCmisSession("admin","admin");
+        for (Member m : siteMembers) {
+            Personne prs = personneRepository.findById(m.getUser().getId()).get();
+            System.out.println("Session properties: " + session.getSessionParameters().get(SessionParameter.USER));
+            System.out.println("Member in progress: " + prs.getNom());
+            List<String> permissions = new ArrayList<String>();
+            String role = m.getRole();
+            if (role.equals("Consumer")) {
+                System.out.println("User is a consumer!");
+                permissions.add("cmis:read");
+            } else if (role.equals("Contributor")) {
+                System.out.println("User is a contributor!");
+                permissions.add("cmis:read");
+                permissions.add("cmis:write");
+            } else if (role.equals("Collaborator")) {
+                System.out.println("User is a collaborator!");
+                permissions.add("cmis:all");
+            }
+            String principal = m.getUser().getNom();
+            Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+            List<Ace> aceListIn = new ArrayList<Ace>();
+            aceListIn.add(aceIn);
+            siteFolder.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
+            siteFolder.refresh();
+            System.out.println("Gave user " + prs.getNom() + " "+m.getRole()+" rights !");
+
+        }
+        session = prem.getCmisSession(nom,password);
+        System.out.println("Changed the session back to current user !");
     }
 
     public String goToMySites()
