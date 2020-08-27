@@ -2,10 +2,7 @@ package tn.xtensus.controller;
 
 
 import com.sun.syndication.feed.atom.Person;
-import org.apache.chemistry.opencmis.client.api.Document;
-import org.apache.chemistry.opencmis.client.api.Folder;
-import org.apache.chemistry.opencmis.client.api.OperationContext;
-import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.client.api.*;
 import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
@@ -96,6 +93,8 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private Personne personToDelete;
     private Set<Doc> siteDocuments;
     private Set<String> siteActivities;
+    private Set<Document> pwcs;
+    private Doc selectedSiteDoc;
 
     @Autowired
     MemberRepository memberRepository;
@@ -261,14 +260,12 @@ public class PersonneController implements IPersonneController, Serializable, ID
     public String delete() {
         System.out.println("######################### Delete function started #########################");
             System.out.println("Deleting file: "+selectedDoc.getNom());
-        docRepository.delete(selectedDoc);
         personne.getDocs().remove(selectedDoc);
-
+        docRepository.delete(selectedDoc);
         Document doc =(Document) session.getObject(selectedDoc.getAlfrescoId());
         doc.delete();
         docs.remove(selectedDoc);
         System.out.println("Deleted file: "+selectedDoc.getNom());
-
         System.out.println("Updating "+personne.getNom());
         personneRepository.save(personne);
         return "/docs-list.xhtml?faces-redirect=true";
@@ -559,11 +556,15 @@ public class PersonneController implements IPersonneController, Serializable, ID
                         testDoc.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
                         testDoc.refresh();
                         System.out.println("Gave user " + per.getNom() + " "+member.getRole()+" rights !");
+                        Folder siteFolder = (Folder)session.getObjectByPath("/Partagé/Sites/"+selectedSite.getNom());
+                        siteFolder.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
+                        siteFolder.refresh();
+                        System.out.println("Gave users access right to site folder!");
 
                         OperationContext operationContext = new OperationContextImpl();
                         operationContext.setIncludeAcls(true);
                         testDoc = (Document) session.getObject(testDoc, operationContext);
-                        System.out.println("l'id du document est: " + testDoc.getId());
+                        System.out.println("the document Id is " + testDoc.getId());
                         testDoc.refresh();
                     }
                 }
@@ -675,6 +676,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 System.out.println("l'id du document est: " + testDoc.getId());
                 testDoc.refresh();
             }
+
             dbDoc.setAlfrescoId(testDoc.getId());
             dbDoc.setNom(file.getFileName());
             dbDoc.setExpediteur(personne);
@@ -752,7 +754,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     public String deleteFromSite() {
         System.out.println("######################### Delete function started #########################");
         docRepository.delete(selectedDoc);
-        //personne.getDocs().remove(selectedDoc);
+        personne.getDocs().remove(selectedDoc);
         selectedSite.getDocuments().remove(selectedDoc);
         siteRepository.save(selectedSite);
         System.out.println("Deleted file: "+selectedDoc.getNom()+" from the database");
@@ -772,6 +774,51 @@ public class PersonneController implements IPersonneController, Serializable, ID
         siteRepository.save(selectedSite);
         siteActivities = selectedSite.getActivities();
         return "/docs-list.xhtml?faces-redirect=true";
+    }
+    public void downloadPWC()
+    {
+        System.out.println("######################### Download PWC Function #########################");
+        Document newDocument = (Document) session.getObject(selectedSiteDoc.getAlfrescoId());
+        ObjectId idOfCheckedOutDocument = newDocument.checkOut();
+        Document pwc = (Document) session.getObject(idOfCheckedOutDocument);
+        pwcs.add(pwc);
+        System.out.println(pwc.getId());
+        System.out.println(pwc.getContentStreamMimeType());
+        try {
+            ContentStream cs = pwc.getContentStream(null);
+            BufferedInputStream in = new BufferedInputStream(cs.getStream());
+            String home = System.getProperty("user.home");
+            //  File file = new File(home+"/Downloads/" + fileName + ".txt");
+            FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + selectedSiteDoc.getNom() );
+            OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
+            byte[] buf = new byte[1024];
+            int n = 0;
+            while ((n = in.read(buf)) > 0) {
+                bufferedOutputStream.write(buf, 0, n);
+            }
+            bufferedOutputStream.close();
+            fos.close();
+            in.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e.getLocalizedMessage());
+        }
+
+    }
+    public void updateFile()
+    {
+        for (Document doc: pwcs)
+        {
+            if(doc.getName().equals(file.getFileName()))
+            {
+                BigInteger bi;
+                bi = BigInteger.valueOf(file.getSize());
+                ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
+                        "application/octet-stream", new ByteArrayInputStream(file.getContents()));
+                ObjectId updateDocId = doc.checkIn(false,null, contentStream,"minor change");
+                Document updateDocument = (Document)session.getObject(updateDocId);
+                System.out.println("The new version is: "+updateDocument.getVersionLabel());
+            }
+        }
     }
 
     public String getNom() {
@@ -1073,5 +1120,21 @@ public class PersonneController implements IPersonneController, Serializable, ID
 
     public void setSiteActivities(Set<String> siteActivities) {
         this.siteActivities = siteActivities;
+    }
+
+    public Set<Document> getPwcs() {
+        return pwcs;
+    }
+
+    public void setPwcs(Set<Document> pwcs) {
+        this.pwcs = pwcs;
+    }
+
+    public Doc getSelectedSiteDoc() {
+        return selectedSiteDoc;
+    }
+
+    public void setSelectedSiteDoc(Doc selectedSiteDoc) {
+        this.selectedSiteDoc = selectedSiteDoc;
     }
 }

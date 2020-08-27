@@ -23,7 +23,7 @@
 										 value="#{personneController.docInbox}"
 										 selectionMode="single"
 										 rowKey="#{document.id}"
-										 selection="#{personneController.selectedDoc}"
+										 selection="#{personneController.selectedSiteDoc}"
 										 scrollable="true" scrollHeight="400">
 								<p:ajax event="rowSelect"
 										update="mainForm:detailsPanel"/>
@@ -42,27 +42,27 @@
 								<table>
 									<tr>
 										<td>Name</td>
-										<td>#{personneController.selectedDoc.nom}</td>
+										<td>#{personneController.selectedSiteDoc.nom}</td>
 									</tr>
 									<tr>
 										<td style="width:200px;">Author</td>
-										<td>#{personneController.selectedDoc.author}</td>
+										<td>#{personneController.selectedSiteDoc.author}</td>
 									</tr>
 									<tr>
 										<td>Creation date</td>
-										<td>#{personneController.selectedDoc.creationDate}</td>
+										<td>#{personneController.selectedSiteDoc.creationDate}</td>
 									</tr>
 									<tr>
 										<td>Type</td>
-										<td>#{personneController.selectedDoc.mimeType}</td>
+										<td>#{personneController.selectedSiteDoc.mimeType}</td>
 									</tr>
 									<tr>
 										<td>Version</td>
-										<td>#{personneController.selectedDoc.version }</td>
+										<td>#{personneController.selectedSiteDoc.version }</td>
 									</tr>
 									<tr>
 										<td>Modification date</td>
-										<td>#{personneController.selectedDoc.modificationDate}</td>
+										<td>#{personneController.selectedSiteDoc.modificationDate}</td>
 									</tr>
 									<tr>
 										<p:commandButton value="show rights" action="#{personneController.checkRights}" update="mainForm:detailsPanel" />
