@@ -93,7 +93,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private Personne personToDelete;
     private Set<Doc> siteDocuments;
     private Set<String> siteActivities;
-    private Set<Document> pwcs;
+    private Set<Document> pwcs = new HashSet<>();
     private Doc selectedSiteDoc;
 
     @Autowired
@@ -778,38 +778,49 @@ public class PersonneController implements IPersonneController, Serializable, ID
     public void downloadPWC()
     {
         System.out.println("######################### Download PWC Function #########################");
+        System.out.println("selected site doc is: "+selectedSiteDoc.getNom());
+        System.out.println("Document version: "+selectedSiteDoc.getVersion());
         Document newDocument = (Document) session.getObject(selectedSiteDoc.getAlfrescoId());
-        ObjectId idOfCheckedOutDocument = newDocument.checkOut();
-        Document pwc = (Document) session.getObject(idOfCheckedOutDocument);
-        pwcs.add(pwc);
-        System.out.println(pwc.getId());
-        System.out.println(pwc.getContentStreamMimeType());
-        try {
-            ContentStream cs = pwc.getContentStream(null);
-            BufferedInputStream in = new BufferedInputStream(cs.getStream());
-            String home = System.getProperty("user.home");
-            //  File file = new File(home+"/Downloads/" + fileName + ".txt");
-            FileOutputStream fos = new FileOutputStream(home+"/Downloads/" + selectedSiteDoc.getNom() );
-            OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
-            byte[] buf = new byte[1024];
-            int n = 0;
-            while ((n = in.read(buf)) > 0) {
-                bufferedOutputStream.write(buf, 0, n);
+        if (newDocument.getAllowableActions().getAllowableActions().contains(org.apache.chemistry.opencmis.commons.enums.Action.CAN_CHECK_OUT)) {
+            newDocument.refresh();
+            ObjectId idOfCheckedOutDocument = newDocument.checkOut();
+            Document pwc = (Document) session.getObject(idOfCheckedOutDocument);
+            pwcs.add(pwc);
+            //System.out.println(pwc.getId());
+            //System.out.println(pwc.getContentStreamMimeType());
+            try {
+                ContentStream cs = pwc.getContentStream(null);
+                BufferedInputStream in = new BufferedInputStream(cs.getStream());
+                String home = System.getProperty("user.home");
+                //  File file = new File(home+"/Downloads/" + fileName + ".txt");
+                FileOutputStream fos = new FileOutputStream(home + "/Downloads/" + selectedSiteDoc.getNom());
+                OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
+                byte[] buf = new byte[1024];
+                int n = 0;
+                while ((n = in.read(buf)) > 0) {
+                    bufferedOutputStream.write(buf, 0, n);
+                }
+                bufferedOutputStream.close();
+                fos.close();
+                in.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e.getLocalizedMessage());
             }
-            bufferedOutputStream.close();
-            fos.close();
-            in.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e.getLocalizedMessage());
-        }
-
+        }else
+            System.out.println("Versioning not support by your ECM");
     }
     public void updateFile()
     {
+        System.out.println("######################### Update File Function #########################");
+        System.out.println("Files to update: "+pwcs.size());
         for (Document doc: pwcs)
         {
-            if(doc.getName().equals(file.getFileName()))
+
+            String fileName = doc.getName().replace("((Copie de Travail))","");
+            System.out.println("Updating file: "+fileName+" "+doc.getName());
+            if(fileName.equals(fileName))
             {
+               
                 BigInteger bi;
                 bi = BigInteger.valueOf(file.getSize());
                 ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,

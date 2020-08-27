@@ -55,38 +55,40 @@
 							<table>
 								<tr>
 									<td>Name</td>
-									<td>#{personneController.selectedDoc.nom}</td>
+									<td>#{personneController.selectedSiteDoc.nom}</td>
 								</tr>
 								<tr>
 									<td style="width:200px;">Author</td>
-									<td>#{personneController.selectedDoc.author}</td>
+									<td>#{personneController.selectedSiteDoc.author}</td>
 								</tr>
 								<tr>
 									<td>Creation date</td>
-									<td>#{personneController.selectedDoc.creationDate}</td>
+									<td>#{personneController.selectedSiteDoc.creationDate}</td>
 								</tr>
 								<tr>
 									<td>Type</td>
-									<td>#{personneController.selectedDoc.mimeType}</td>
+									<td>#{personneController.selectedSiteDoc.mimeType}</td>
 								</tr>
 								<tr>
 									<td>Version</td>
-									<td>#{PersonneController.selectedDoc.version }</td>
+									<td>#{personneController.selectedSiteDoc.version }</td>
 								</tr>
 								<tr>
 									<td>Modification date</td>
-									<td>#{PersonneController.selectedDoc.modificationDate}</td>
+									<td>#{personneController.selectedSiteDoc.modificationDate}</td>
 								</tr>
 							</table>
 						</p:outputPanel>
 					</td>
 				</tr>
 			</table>
-			<p:commandButton value="Download" action="#{personneController.downloadPWC}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
+			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
 			</p:commandButton>
 			<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
 				<h:outputText value="Download complete !" />
 			</p:dialog>
+			<p:commandButton value="Download PWC" action="#{personneController.downloadPWC}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
+			</p:commandButton>
 			<p:growl id="message" showDetail="true" />
 			<p:commandButton value="Delete" action="#{personneController.deleteFromSite}" update="message" >
 				<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />

@@ -54,27 +54,27 @@
 							<table>
 								<tr>
 									<td>Name</td>
-									<td>#{personneController.selectedDoc.nom}</td>
+									<td>#{personneController.selectedSiteDoc.nom}</td>
 								</tr>
 								<tr>
 									<td style="width:200px;">Author</td>
-									<td>#{personneController.selectedDoc.author}</td>
+									<td>#{personneController.selectedSiteDoc.author}</td>
 								</tr>
 								<tr>
 									<td>Creation date</td>
-									<td>#{personneController.selectedDoc.creationDate}</td>
+									<td>#{personneController.selectedSiteDoc.creationDate}</td>
 								</tr>
 								<tr>
 									<td>Type</td>
-									<td>#{personneController.selectedDoc.mimeType}</td>
+									<td>#{personneController.selectedSiteDoc.mimeType}</td>
 								</tr>
 								<tr>
 									<td>Version</td>
-									<td>#{PersonneController.selectedDoc.version }</td>
+									<td>#{PersonneController.selectedSiteDoc.version }</td>
 								</tr>
 								<tr>
 									<td>Modification date</td>
-									<td>#{PersonneController.selectedDoc.modificationDate}</td>
+									<td>#{PersonneController.selectedSiteDoc.modificationDate}</td>
 								</tr>
 							</table>
 						</p:outputPanel>
@@ -88,6 +88,12 @@
 			</p:dialog>
 		</h:form>
 	</section>
+	<p:dataTable var="activity"
+				 value="#{personneController.siteActivities}">
+		<p:column headerText="News feed">
+			<h:outputText value="#{activity}"/>
+		</p:column>
+	</p:dataTable>
 
 </ui:define>
 </ui:composition>
