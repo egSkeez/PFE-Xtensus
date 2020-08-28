@@ -780,29 +780,35 @@ public class PersonneController implements IPersonneController, Serializable, ID
         System.out.println("######################### Download PWC Function #########################");
         System.out.println("selected site doc is: "+selectedSiteDoc.getNom());
         System.out.println("Document version: "+selectedSiteDoc.getVersion());
+        System.out.println("PWCs size: "+pwcs.size());
         Document newDocument = (Document) session.getObject(selectedSiteDoc.getAlfrescoId());
         if (newDocument.getAllowableActions().getAllowableActions().contains(org.apache.chemistry.opencmis.commons.enums.Action.CAN_CHECK_OUT)) {
-            newDocument.refresh();
-            ObjectId idOfCheckedOutDocument = newDocument.checkOut();
-            Document pwc = (Document) session.getObject(idOfCheckedOutDocument);
-            pwcs.add(pwc);
             //System.out.println(pwc.getId());
             //System.out.println(pwc.getContentStreamMimeType());
             try {
-                ContentStream cs = pwc.getContentStream(null);
+                ContentStream cs = newDocument.getContentStream(null);
                 BufferedInputStream in = new BufferedInputStream(cs.getStream());
                 String home = System.getProperty("user.home");
+                String downloadFolder = home+"/Desktop/Downloads/"+selectedSiteDoc.getNom();
+                System.out.println("Download path: "+downloadFolder);
                 //  File file = new File(home+"/Downloads/" + fileName + ".txt");
-                FileOutputStream fos = new FileOutputStream(home + "/Downloads/" + selectedSiteDoc.getNom());
+                FileOutputStream fos = new FileOutputStream(downloadFolder);
                 OutputStream bufferedOutputStream = new BufferedOutputStream(fos);
                 byte[] buf = new byte[1024];
                 int n = 0;
                 while ((n = in.read(buf)) > 0) {
+                    System.out.println("reading buffer");
                     bufferedOutputStream.write(buf, 0, n);
                 }
                 bufferedOutputStream.close();
                 fos.close();
                 in.close();
+                newDocument.refresh();
+                ObjectId idOfCheckedOutDocument = newDocument.checkOut();
+                Document pwc = (Document) session.getObject(idOfCheckedOutDocument);
+                pwcs.add(pwc);
+                System.out.println("Added file to PWCs");
+                System.out.println("Download complete !");
             } catch (IOException e) {
                 throw new RuntimeException(e.getLocalizedMessage());
             }
@@ -828,7 +834,16 @@ public class PersonneController implements IPersonneController, Serializable, ID
                 ObjectId updateDocId = doc.checkIn(false,null, contentStream,"minor change");
                 Document updateDocument = (Document)session.getObject(updateDocId);
                 System.out.println("The new version is: "+updateDocument.getVersionLabel());
+                System.out.println("doc name: "+updateDocument.getName());
+                Doc dbDoc =docRepository.getDocByName(updateDocument.getName());
+                dbDoc.setAlfrescoId(updateDocument.getId());
+                dbDoc.setVersion(updateDocument.getVersionLabel());
+                docRepository.save(dbDoc);
+                System.out.println("Updated doc in database");
+                siteDocuments = selectedSite.getDocuments();
             }
+            pwcs.remove(doc);
+            System.out.println("removed file from pwcs!");
         }
     }
 
