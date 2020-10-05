@@ -14,101 +14,146 @@
 
 	<section class="section about-section gray-bg" id="about">
 		<h5>You are the site manager!</h5>
-		<h:form>
-		<p:commandButton value="Manage users" action="#{personneController.goToAddMembers}" />
-		<p:dataTable var="personne"
-					 value="#{personneController.siteMembers}">
-			<p:column headerText="Name">
-				<h:outputText value="#{personne.user.nom}"/>
-			</p:column>
 
-			<p:column headerText="Role">
-				<h:outputText value="#{personne.role}"/>
-			</p:column>
+		<div class="row" >
 
-		</p:dataTable>
-		</h:form>
-		<h:form id="mainForm">
-			<table>
-				<tr>
-					<td style="width:400px;border:solid 1px gray;">
-						<p:dataTable var="document"
-									 value="#{personneController.siteDocuments}"
-									 selectionMode="single"
-									 rowKey="#{document.id}"
-									 selection="#{personneController.selectedSiteDoc}"
-									 scrollable="true" scrollHeight="400">
-							<p:ajax event="rowSelect"
-									update="mainForm:detailsPanel"/>
-							<p:column headerText="Id" style="width:35px;">
-								<h:outputText value="#{document.id}"/>
-							</p:column>
+				<h:form>
+				<div class="card mb-3">
+					<div class="card-header">
+						<h4>Users :</h4>
+					</div>
 
+					<div class="card-body">
+
+
+						<p:dataTable var="personne"
+									 value="#{personneController.siteMembers}">
 							<p:column headerText="Name">
-								<h:outputText value="#{document.nom}"/>
+								<h:outputText value="#{personne.user.nom}"/>
 							</p:column>
+
+							<p:column headerText="Role">
+								<h:outputText value="#{personne.role}"/>
+							</p:column>
+
 						</p:dataTable>
-					</td>
-					<td style="vertical-align:top;padding: 50px; ">
-						<p:outputPanel id="detailsPanel" style="display:block">
-							<h3>Details:</h3>
-							<table>
-								<tr>
-									<td>Name</td>
-									<td>#{personneController.selectedSiteDoc.nom}</td>
-								</tr>
-								<tr>
-									<td style="width:200px;">Author</td>
-									<td>#{personneController.selectedSiteDoc.author}</td>
-								</tr>
-								<tr>
-									<td>Creation date</td>
-									<td>#{personneController.selectedSiteDoc.creationDate}</td>
-								</tr>
-								<tr>
-									<td>Type</td>
-									<td>#{personneController.selectedSiteDoc.mimeType}</td>
-								</tr>
-								<tr>
-									<td>Version</td>
-									<td>#{personneController.selectedSiteDoc.version }</td>
-								</tr>
-								<tr>
-									<td>Modification date</td>
-									<td>#{personneController.selectedSiteDoc.modificationDate}</td>
-								</tr>
-							</table>
-						</p:outputPanel>
-					</td>
-				</tr>
-			</table>
-			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
-			</p:commandButton>
-			<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
-				<h:outputText value="Download complete !" />
-			</p:dialog>
-			<p:commandButton value="Download PWC" action="#{personneController.downloadPWC}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
-			</p:commandButton>
-			<p:growl id="message" showDetail="true" />
-			<p:commandButton value="Delete" action="#{personneController.deleteFromSite}" update="message" >
-				<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
-			</p:commandButton>
-			<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
-				<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
-				<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
-			</p:confirmDialog>
-		</h:form>
-		<h:form enctype="multipart/form-data" id="uploadforsite">
-			<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>
-			<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadForSite}"
-							 disabled="false" />
-		</h:form>
-		<p:dataTable var="activity"
+
+					</div>
+					<div class="d-block text-right card-footer">
+						<p:commandButton value="Manage users" action="#{personneController.goToAddMembers}" styleClass="form-control " />
+					</div>
+				</div>
+				</h:form>
+			</div>
+
+		<div class="row">
+
+			<h:form id="mainForm" enctype="multipart/form-data" >
+			<div class="card mb-3">
+				<div class="card-header">
+					<h4>Documents :</h4>
+					<div class="pull-right">
+							<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>
+							<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadForSite}"
+											 disabled="false" />
+					</div>
+
+				</div>
+
+				<div class="card-body">
+					<div class="row">
+							<div class="col">
+								<p:dataTable var="document"
+											 value="#{personneController.siteDocuments}"
+											 selectionMode="single"
+											 rowKey="#{document.id}"
+											 selection="#{personneController.selectedSiteDoc}"
+											 scrollable="true" >
+									<p:ajax event="rowSelect"
+											update="mainForm:detailsPanel"/>
+									<p:column headerText="Id" style="width:35px;">
+										<h:outputText value="#{document.id}"/>
+									</p:column>
+
+									<p:column headerText="Name">
+										<h:outputText value="#{document.nom}"/>
+									</p:column>
+								</p:dataTable>
+							</div>
+							<div class="col">
+								<p:outputPanel id="detailsPanel" style="display:block">
+									<h3>Details:</h3>
+									<table>
+										<tr>
+											<td>Name</td>
+											<td>#{personneController.selectedSiteDoc.nom}</td>
+										</tr>
+										<tr>
+											<td style="width:200px;">Author</td>
+											<td>#{personneController.selectedSiteDoc.author}</td>
+										</tr>
+										<tr>
+											<td>Creation date</td>
+											<td>#{personneController.selectedSiteDoc.creationDate}</td>
+										</tr>
+										<tr>
+											<td>Type</td>
+											<td>#{personneController.selectedSiteDoc.mimeType}</td>
+										</tr>
+										<tr>
+											<td>Version</td>
+											<td>#{personneController.selectedSiteDoc.version }</td>
+										</tr>
+										<tr>
+											<td>Modification date</td>
+											<td>#{personneController.selectedSiteDoc.modificationDate}</td>
+										</tr>
+									</table>
+								</p:outputPanel>
+							</div>
+					</div>
+				</div>
+
+				<div class="d-block text-right card-footer">
+					<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();" styleClass="form-control">
+					</p:commandButton>
+					<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
+						<h:outputText value="Download complete !" />
+					</p:dialog>
+					<p:commandButton value="Download PWC" action="#{personneController.downloadPWC}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();" styleClass="form-control">
+					</p:commandButton>
+					<p:growl id="message" showDetail="true" />
+					<p:commandButton value="Delete" action="#{personneController.deleteFromSite}" update="message" styleClass="form-control" >
+						<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
+					</p:commandButton>
+					<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+						<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+						<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+					</p:confirmDialog>
+				</div>
+			</div>
+			</h:form>
+
+		</div>
+
+		<div class="row">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h4>News Feed :</h4>
+				</div>
+
+				<div class="card-body">
+					<p:dataTable var="activity"
 					 value="#{personneController.siteActivities}">
 			<p:column headerText="News feed">
 				<h:outputText value="#{activity}"/>
 			</p:column>
 		</p:dataTable>
+				</div>
+			</div>
+		</div>
+
+
 	</section>
 
 </ui:define>

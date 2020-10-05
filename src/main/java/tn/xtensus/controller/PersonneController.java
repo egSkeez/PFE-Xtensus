@@ -44,7 +44,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import static java.lang.Integer.getInteger;
 import static java.lang.Integer.valueOf;
 
@@ -126,6 +127,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         return people = iPersonneService.getPersonnes();
     }
     @Transactional
+
     public String doLogin(){
         System.out.println("######################### doLogin Function triggered #########################");
         System.out.println("User signed up: "+nom);
@@ -380,7 +382,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
 
 
-        return "/login.xhtml?faces-redirect=true";
+        return "/WEB-INF/jsp/login.jsf?faces-redirect=true";
 
 
     }

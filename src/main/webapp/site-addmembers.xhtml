@@ -13,63 +13,101 @@
 <ui:define name="content">
 
 	<section class="section about-section gray-bg" id="about">
-		<h:form>
-		<p:dataTable var="personne" value="#{personneController.people}">
-			<p:column headerText="Id" style="width:45px;">
-				<h:outputText value="#{personne.id}" />
-			</p:column>
-			<p:column headerText="Name">
-				<h:outputText value="#{personne.nom}" />
-			</p:column>
 
-			<p:column headerText="Last Name" >
-				<h:outputText value="#{personne.prenom}" />
-			</p:column>
-			<p:column>
-				<p:commandButton value="Add" action="#{personneController.addMembers}" update=":roleform:roletable" >
-					<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToAdd}" />
-				</p:commandButton>
-			</p:column>
-		</p:dataTable>
-		</h:form>
-		<h:form id="roleform">
-		<p:dataTable id="roletable" var="personne" value="#{personneController.peopleToAdd}" >
-			<p:column headerText="Name">
-				<h:outputText value="#{personne.nom}" />
-			</p:column>
+		<div class="row">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h4>Users :</h4>
+				</div>
 
-			<p:column headerText="Choose role" >
-				<p:outputLabel for="@next"  />
-				<p:selectOneMenu id="console" value="#{personneController.chosenRole}" style="width:300px">
-					<f:selectItem itemLabel="Select One" itemValue="None" />
-					<f:selectItem itemLabel="Collaborator" itemValue="Collaborator" />
-					<f:selectItem itemLabel="Contributor" itemValue="Contributor" />
-					<f:selectItem itemLabel="Consumer" itemValue="Consumer" />
-					<f:facet name="footer">
-						<p:separator />
-						<h:outputText value="3 consoles" style="font-weight:bold;"/>
-					</f:facet>
-				</p:selectOneMenu>
-			</p:column>
-		</p:dataTable>
-			<p:commandButton value="Confirm" action="#{personneController.confirmAdd}" />
-		</h:form>
+				<div class="card-body">
+					<h:form>
+						<p:dataTable var="personne" value="#{personneController.people}">
+							<p:column headerText="Id" style="width:45px;">
+								<h:outputText value="#{personne.id}" />
+							</p:column>
+							<p:column headerText="Name">
+								<h:outputText value="#{personne.nom}" />
+							</p:column>
 
-		<p:dataTable id="current_users" var="personne"
-					 value="#{personneController.membersBySite}">
-			<p:column headerText="Name">
-				<h:outputText value="#{personne.nom}"/>
-			</p:column>
+							<p:column headerText="Last Name" >
+								<h:outputText value="#{personne.prenom}" />
+							</p:column>
+							<p:column>
+								<p:commandButton value="Add" action="#{personneController.addMembers}" update=":roleform:roletable" >
+									<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToAdd}" />
+								</p:commandButton>
+							</p:column>
+						</p:dataTable>
+					</h:form>
+				</div>
+			</div>
+		</div>
 
-			<p:column headerText="Last name">
-				<h:outputText value="#{personne.prenom}"/>
-			</p:column>
-			<p:column>
-				<p:commandButton value="Delete" action="#{personneController.deleteMember}" update=":current_users">
-					<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToDelete}" />
-				</p:commandButton>
-			</p:column>
-		</p:dataTable>
+		<div class="row">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h4>Roles :</h4>
+				</div>
+
+				<div class="card-body">
+					<h:form id="roleform">
+						<p:dataTable id="roletable" var="personne" value="#{personneController.peopleToAdd}" >
+							<p:column headerText="Name">
+								<h:outputText value="#{personne.nom}" />
+							</p:column>
+
+							<p:column headerText="Choose role" >
+								<p:outputLabel for="@next"  />
+								<p:selectOneMenu id="console" value="#{personneController.chosenRole}" style="width:300px">
+									<f:selectItem itemLabel="Select One" itemValue="None" />
+									<f:selectItem itemLabel="Collaborator" itemValue="Collaborator" />
+									<f:selectItem itemLabel="Contributor" itemValue="Contributor" />
+									<f:selectItem itemLabel="Consumer" itemValue="Consumer" />
+									<f:facet name="footer">
+										<p:separator />
+										<h:outputText value="3 consoles" style="font-weight:bold;"/>
+									</f:facet>
+								</p:selectOneMenu>
+							</p:column>
+						</p:dataTable>
+					<br/>
+						<p:commandButton value="Confirm" action="#{personneController.confirmAdd}" styleClass="btn btn-primary pull-right" />
+					</h:form>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="row">
+			<div class="card mb-3">
+				<div class="card-header">
+					<h4>Added Users :</h4>
+				</div>
+
+				<div class="card-body">
+					<p:dataTable id="current_users" var="personne"
+								 value="#{personneController.membersBySite}">
+						<p:column headerText="Name">
+							<h:outputText value="#{personne.nom}"/>
+						</p:column>
+
+						<p:column headerText="Last name">
+							<h:outputText value="#{personne.prenom}"/>
+						</p:column>
+						<p:column>
+							<p:commandButton value="Delete" action="#{personneController.deleteMember}" update=":current_users">
+								<f:setPropertyActionListener value="#{personne}" target="#{personneController.personToDelete}" />
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+				</div>
+			</div>
+		</div>
+
+
+
+
 	</section>
 
 </ui:define>

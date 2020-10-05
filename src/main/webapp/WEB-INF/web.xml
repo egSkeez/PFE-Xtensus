@@ -20,6 +20,10 @@
         <param-value>true</param-value>
     </context-param>
     <context-param>
+        <param-name>primefaces.UPLOADER</param-name>
+        <param-value>commons</param-value>
+    </context-param>
+    <context-param>
         <description>If this property is set to true, the number
             that is used to generate new client IDs is stored in the view
             so that it is saved between requests.
@@ -31,4 +35,12 @@
         <param-name>javax.faces.SERIALIZE_SERVER_STATE</param-name>
         <param-value>true</param-value>
     </context-param>
+    <filter>
+        <filter-name>PrimeFaces FileUpload Filter</filter-name>
+        <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>PrimeFaces FileUpload Filter</filter-name>
+        <servlet-name>Faces Servlet</servlet-name>
+    </filter-mapping>
 </web-app>

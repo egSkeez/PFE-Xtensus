@@ -13,125 +13,222 @@
 <ui:define name="content">
 
 	<section class="section about-section gray-bg" id="about">
-		<div class="container">
-			<h2>Inbox</h2>
-			<h:form id="mainForm">
-				<table>
-					<tr>
-						<td style="width:300px;border:solid 1px gray;">
-							<p:dataTable var="document"
-										 value="#{personneController.docInbox}"
-										 selectionMode="single"
-										 rowKey="#{document.id}"
-										 selection="#{personneController.selectedSiteDoc}"
-										 scrollable="true" scrollHeight="400">
-								<p:ajax event="rowSelect"
-										update="mainForm:detailsPanel"/>
-								<p:column headerText="Id">
-									<h:outputText value="#{document.id}"/>
+		<div class="app-page-title">
+			<div class="page-title-wrapper">
+				<div class="page-title-heading">
+					<div class="page-title-icon">
+						<i class="pe-7s-album icon-gradient bg-sunny-morning">
+						</i>
+					</div>
+					<div>Carousels &amp; Slideshows
+						<div class="page-title-subheading">Create easy and beautiful slideshows with these React components.
+						</div>
+					</div>
+				</div>
+				<div class="page-title-actions">
+					<button type="button" data-toggle="tooltip" title="" data-placement="bottom" class="btn-shadow mr-3 btn btn-dark" data-original-title="Example Tooltip">
+						<i class="fa fa-star"></i>
+					</button>
+					<div class="d-inline-block dropdown">
+						<button type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn-shadow dropdown-toggle btn btn-info">
+                                            <span class="btn-icon-wrapper pr-2 opacity-7">
+                                                <i class="fa fa-business-time fa-w-20"></i>
+                                            </span>
+							Buttons
+						</button>
+						<div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
+							<ul class="nav flex-column">
+								<li class="nav-item">
+									<a href="javascript:void(0);" class="nav-link">
+										<i class="nav-link-icon lnr-inbox"></i>
+										<span>
+                                                            Inbox
+                                                        </span>
+										<div class="ml-auto badge badge-pill badge-secondary">86</div>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a href="javascript:void(0);" class="nav-link">
+										<i class="nav-link-icon lnr-book"></i>
+										<span>
+                                                            Book
+                                                        </span>
+										<div class="ml-auto badge badge-pill badge-danger">5</div>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a href="javascript:void(0);" class="nav-link">
+										<i class="nav-link-icon lnr-picture"></i>
+										<span>
+                                                            Picture
+                                                        </span>
+									</a>
+								</li>
+								<li class="nav-item">
+									<a disabled="" href="javascript:void(0);" class="nav-link disabled">
+										<i class="nav-link-icon lnr-file-empty"></i>
+										<span>
+                                                            File Disabled
+                                                        </span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>    </div>
+		</div>
+		<h:form id="mainForm">
+		<div class="row" >
+
+			<div class="col ">
+					<div class="card mb-3">
+						<div class="card-header">
+							<h4>Inbox :</h4>
+						</div>
+					<div class="card-body">
+
+
+							<table class="mb-0 table table-borderless">
+								<tr>
+									<td style="width:300px;border:solid 1px gray;">
+										<p:dataTable var="document"
+													 value="#{personneController.docInbox}"
+													 selectionMode="single"
+													 rowKey="#{document.id}"
+													 selection="#{personneController.selectedSiteDoc}"
+													 scrollable="true">
+											<p:ajax event="rowSelect"
+													update="mainForm:detailsPanel"/>
+											<p:column headerText="Id">
+												<h:outputText value="#{document.id}"/>
+											</p:column>
+
+											<p:column headerText="Name">
+												<h:outputText value="#{document.nom}"/>
+											</p:column>
+										</p:dataTable>
+									</td>
+								</tr>
+							</table>
+
+					</div>
+					</div>
+			</div>
+
+			<div class="col ">
+				<div class="card mb-3">
+					<div class="card-header">
+						<h4>Details :</h4>
+					</div>
+					<div class="card-body">
+						<label for="detailsPanel">
+							<p:commandButton value="show rights" action="#{personneController.checkRights}" update="mainForm:detailsPanel" class="form-control" />
+						</label>
+						<p:outputPanel id="detailsPanel" style="display:block">
+
+						<table>
+							<tr>
+								<td>Name</td>
+								<td>#{personneController.selectedSiteDoc.nom}</td>
+							</tr>
+							<tr>
+								<td style="width:200px;">Author</td>
+								<td>#{personneController.selectedSiteDoc.author}</td>
+							</tr>
+							<tr>
+								<td>Creation date</td>
+								<td>#{personneController.selectedSiteDoc.creationDate}</td>
+							</tr>
+							<tr>
+								<td>Type</td>
+								<td>#{personneController.selectedSiteDoc.mimeType}</td>
+							</tr>
+							<tr>
+								<td>Version</td>
+								<td>#{personneController.selectedSiteDoc.version }</td>
+							</tr>
+							<tr>
+								<td>Modification date</td>
+								<td>#{personneController.selectedSiteDoc.modificationDate}</td>
+							</tr>
+
+
+
+							<tr>
+								<td>Rights</td>
+								<td>#{personneController.checkRights}</td>
+							</tr>
+
+						</table>
+					</p:outputPanel>
+					</div>
+					<div class="d-block text-right card-footer">
+						<p:commandButton value="Delete" action="#{personneController.delete}" update="message" class="form-control">
+							<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
+						</p:commandButton>
+						<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+							<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+							<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+						</p:confirmDialog>
+						<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();" class="form-control">
+						</p:commandButton>
+						<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
+							<h:outputText value="Download complete !" />
+						</p:dialog>
+					</div>
+				</div>
+			</div>
+
+			<div class="col ">
+			<div class="card mb-3">
+
+						<div class="main-card">
+							<div class="card-header">
+								<h4>Users :</h4>
+							</div>
+						<div class="card-body">
+							<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
+										 emptyMessage="None found with given criteria"
+										 filteredValue="#{personneController.filteredPeople}"
+										 selectionMode="multiple"
+										 selection="#{personneController.recievers}"
+										 rowKey="#{personne.id}" >
+								<p:column headerText="Id" style="width:35px;">
+									<h:outputText value="#{personne.id}" />
+								</p:column>
+								<p:column filterBy="#{personne.nom}"
+										  headerText="Name"
+										  filterMatchMode="contains"
+										  placeholder="Name">
+									<h:outputText value="#{personne.nom}" />
 								</p:column>
 
-								<p:column headerText="Name">
-									<h:outputText value="#{document.nom}"/>
+								<p:column headerText="Last Name" >
+									<h:outputText value="#{personne.prenom}" />
 								</p:column>
 							</p:dataTable>
-						</td>
-						<td style="vertical-align:top;padding: 50px; ">
-							<p:outputPanel id="detailsPanel" style="display:block">
-								<h3>Details:</h3>
-								<table>
-									<tr>
-										<td>Name</td>
-										<td>#{personneController.selectedSiteDoc.nom}</td>
-									</tr>
-									<tr>
-										<td style="width:200px;">Author</td>
-										<td>#{personneController.selectedSiteDoc.author}</td>
-									</tr>
-									<tr>
-										<td>Creation date</td>
-										<td>#{personneController.selectedSiteDoc.creationDate}</td>
-									</tr>
-									<tr>
-										<td>Type</td>
-										<td>#{personneController.selectedSiteDoc.mimeType}</td>
-									</tr>
-									<tr>
-										<td>Version</td>
-										<td>#{personneController.selectedSiteDoc.version }</td>
-									</tr>
-									<tr>
-										<td>Modification date</td>
-										<td>#{personneController.selectedSiteDoc.modificationDate}</td>
-									</tr>
-									<tr>
-										<p:commandButton value="show rights" action="#{personneController.checkRights}" update="mainForm:detailsPanel" />
-									</tr>
-									<tr>
-										<td>Rights</td>
-										<td>#{personneController.checkRights}</td>
-									</tr>
+							<br/>
+							<p:commandButton value="Send" action="#{personneController.sendTo}" class="form-control" />
+							<br/>
 
-								</table>
-							</p:outputPanel>
-						</td>
-					</tr>
-				</table>
-			</h:form>
-			<br/>
-			<br/>
+							<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
+								<f:selectItem itemLabel="Read" itemValue="read" />
+								<f:selectItem itemLabel="Write" itemValue="write" />
+								<f:selectItem itemLabel="All" itemValue="all" />
+								<f:selectItem itemLabel="Middle man" itemValue="middle man" />
+							</p:selectManyCheckbox>
 
-		</div>
-		<h:form>
-			<div class="main-card mb-3 card">
-			<div class="card-body"><h5 class="card-title">People</h5>
-				<p:dataTable var="personne" value="#{personneController.people}" widgetVar="peopleTable"
-							 emptyMessage="None found with given criteria"
-							 filteredValue="#{personneController.filteredPeople}"
-							 selectionMode="multiple"
-							 selection="#{personneController.recievers}"
-							 rowKey="#{personne.id}" >
-					<p:column headerText="Id" style="width:35px;">
-						<h:outputText value="#{personne.id}" />
-					</p:column>
-					<p:column filterBy="#{personne.nom}"
-							  headerText="Name"
-							  filterMatchMode="contains"
-							  placeholder="Name">
-						<h:outputText value="#{personne.nom}" />
-					</p:column>
+							<p:growl id="message" showDetail="true" />
+						</div>
+					</div>
 
-					<p:column headerText="Last Name" >
-						<h:outputText value="#{personne.prenom}" />
-					</p:column>
-				</p:dataTable>
-				<p:commandButton value="Send" action="#{personneController.sendTo}" />
+
+
 			</div>
+			</div>
+
 		</div>
-			<p:selectManyCheckbox id="basic" value="#{personneController.selectedRights}">
-				<f:selectItem itemLabel="Read" itemValue="read" />
-				<f:selectItem itemLabel="Write" itemValue="write" />
-				<f:selectItem itemLabel="All" itemValue="all" />
-				<f:selectItem itemLabel="Middle man" itemValue="middle man" />
-			</p:selectManyCheckbox>
-			<p:separator />
-			<p:growl id="message" showDetail="true" />
-			<p:commandButton value="Delete" action="#{personneController.delete}" update="message" >
-				<p:confirm header="Confirmation" message="Are you sure?" icon="pi pi-exclamation-triangle" />
-			</p:commandButton>
-			<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
-				<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
-				<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
-			</p:confirmDialog>
-			<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();">
-			</p:commandButton>
-			<p:dialog header="Download" widgetVar="dlg1" minHeight="40">
-				<h:outputText value="Download complete !" />
-			</p:dialog>
 		</h:form>
-
-
-
 	</section>
 
 </ui:define>

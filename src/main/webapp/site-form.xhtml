@@ -13,46 +13,53 @@
 <ui:define name="content">
 
 	<section class="section about-section gray-bg" id="about">
-		<h:form id="siteform"  class="login100-form validate-form">
-		<div class="container">
-			<h3>Create Site</h3>
 
-			<div class="p-field p-grid">
-				<p:outputLabel for="sitename" styleClass="p-col-fixed" style="width:100px" value="Site name" />
-				<div class="p-col">
-					<p:inputText id="sitename" value="#{personneController.siteName}"/>
-				</div>
+		<div class="card mb-3">
+			<div class="card-header">
+				<h4>Create Site :</h4>
 			</div>
-			<div class="p-field p-grid">
-				<p:outputLabel for="siteid" styleClass="p-col-fixed" style="width:100px" value="Site Id" />
-				<div class="p-col">
-					<p:inputText id="siteid" value="#{personneController.siteId}"/>
-				</div>
-			</div>
-			<div class="p-field p-grid">
-				<p:outputLabel for="description"  styleClass="p-col-fixed" style="width:100px" value="Description" />
-				<div class="p-col">
-					<p:inputTextarea rows="10" cols="50" id="description" value="#{personneController.siteDescription}" />
-				</div>
-			</div>
-			<div>
-			<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
-				<p:outputLabel value="Visibility" />
-				<p:selectOneRadio id="visibility" value="#{personneController.siteVisibility}" unselectable="true">
-					<f:selectItem itemLabel="Public" itemValue="public" />
-					<f:selectItem itemLabel="Private" itemValue="private" />
-				</p:selectOneRadio>
-			</h:panelGrid>
-			</div>
-			<div class="container-login100-form-btn">
+			<div class="card-body">
+				<h:form id="siteform"  class="login100-form validate-form">
 
-				<h:commandButton id="btn" styleClass="login100-form-btn" value="Create" action="#{personneController.createSite}" />
-			</div>
 
+					<div class="p-field p-grid">
+						<p:outputLabel for="sitename" styleClass="p-col-fixed" style="width:100px" value="Site name"  />
+						<div class="p-col">
+							<p:inputText id="sitename" value="#{personneController.siteName}" class="form-control"/>
+						</div>
+					</div>
+					<div class="p-field p-grid">
+						<p:outputLabel for="siteid" styleClass="p-col-fixed" style="width:100px" value="Site Id" />
+						<div class="p-col">
+							<p:inputText id="siteid" value="#{personneController.siteId}" class="form-control"/>
+						</div>
+					</div>
+					<div class="p-field p-grid">
+						<p:outputLabel for="description"  styleClass="p-col-fixed" style="width:100px" value="Description" />
+						<div class="p-col">
+							<p:inputTextarea rows="10" cols="50" id="description" value="#{personneController.siteDescription}" class="form-control" />
+						</div>
+					</div>
+					<div>
+						<h:panelGrid columns="2" style="margin-bottom:10px" cellpadding="5">
+							<br/>
+							<p:outputLabel value="Visibility" />
+							<br/>
+							<p:selectOneRadio id="visibility" value="#{personneController.siteVisibility}" unselectable="true">
+								<f:selectItem itemLabel="Public" itemValue="public" />
+								<f:selectItem itemLabel="Private" itemValue="private" />
+							</p:selectOneRadio>
+						</h:panelGrid>
+					</div>
+					<div class="container-login100-form-btn">
+
+						<h:commandButton id="btn" styleClass="btn btn-primary pull-right" value="Create" action="#{personneController.createSite}" />
+					</div>
+
+
+				</h:form>
+			</div>
 		</div>
-		</h:form>
-
-
 
 
 	</section>

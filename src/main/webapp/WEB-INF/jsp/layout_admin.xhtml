@@ -58,13 +58,9 @@
                                 <div class="widget-content-wrapper">
                                     <div class="widget-content-left">
                                         <div class="btn-group">
-                                            <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="p-0 btn">
-                                                <img width="42" class="rounded-circle" src="assets/images/avatars/1.jpg" alt=""/>
-                                                <i class="fa fa-angle-down ml-2 opacity-8"></i>
-                                            </a>
-                                            <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu dropdown-menu-right">
-                                                <button type="button" tabindex="0" class="dropdown-item">Logout</button>
-                                            </div>
+                                            <h:form  id="form">
+                                                <h:commandButton id="btn" styleClass="form-control" value="Logout" action="#{personneController.doLogout}" />
+                                            </h:form>
                                         </div>
                                     </div>
                                     <div class="widget-content-left  ml-3 header-user-info">
@@ -395,10 +391,24 @@
 
                             <li class="app-sidebar__heading">Menu</li>
                             <li>
-                                <a >
-                                    <i class="metismenu-icon pe-7s-display2"></i>
-                                    My documents
-                                </a>
+                                <p:commandButton value="Inbox" action="#{personneController.inboxPage}" class="form-control" />
+
+                            </li>
+                            <br/>
+                            <li>
+                                <p:commandButton value="Create site" action="#{personneController.goToSiteCreation}" class="form-control" />
+
+                            </li>
+                            <br/>
+                            <li>
+                                <p:commandButton value="All sites" action="#{personneController.goToAllSites}" class="form-control" />
+
+
+                            </li>
+                            <br/>
+                            <li>
+                                <p:commandButton value="My sites" action="#{personneController.goToMySites}" class="form-control" />
+
                             </li>
 
                         </ul>
