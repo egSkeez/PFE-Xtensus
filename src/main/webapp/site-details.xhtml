@@ -48,21 +48,24 @@
 
 		<div class="row">
 
-			<h:form id="mainForm" enctype="multipart/form-data" >
+
 			<div class="card mb-3">
 				<div class="card-header">
 					<h4>Documents :</h4>
 					<div class="pull-right">
-							<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>
-							<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadForSite}"
-											 disabled="false" />
+						<form action="/uploadforsite" method="post" enctype="multipart/form-data">
+							<input type="file" name="files"/>
+							<input type="submit" value="Upload Files"></input>
+						</form>
 					</div>
 
 				</div>
 
 				<div class="card-body">
+					<h:form id="mainForm" enctype="multipart/form-data" >
 					<div class="row">
 							<div class="col">
+
 								<p:dataTable var="document"
 											 value="#{personneController.siteDocuments}"
 											 selectionMode="single"
@@ -110,10 +113,13 @@
 										</tr>
 									</table>
 								</p:outputPanel>
-							</div>
-					</div>
-				</div>
 
+							</div>
+
+					</div>
+					</h:form>
+				</div>
+				<h:form id="mainForms" enctype="multipart/form-data" >
 				<div class="d-block text-right card-footer">
 					<p:commandButton value="Download" action="#{personneController.downloadDocument}" icon="pi pi-arrow-down" onclick="PF('dlg1').show();" styleClass="form-control">
 					</p:commandButton>
@@ -130,9 +136,15 @@
 						<p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
 						<p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
 					</p:confirmDialog>
+
 				</div>
+				</h:form>
+				<form action="/update" method="post" enctype="multipart/form-data">
+				<input type="file" name="files"/>
+				<input type="submit" value="Update"></input>
+				</form>
 			</div>
-			</h:form>
+
 
 		</div>
 

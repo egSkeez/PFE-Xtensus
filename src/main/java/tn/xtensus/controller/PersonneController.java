@@ -23,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tn.xtensus.entities.*;
 import tn.xtensus.repository.*;
 import tn.xtensus.service.IDocService;
@@ -38,14 +42,17 @@ import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+
 import static java.lang.Integer.getInteger;
 import static java.lang.Integer.valueOf;
 
@@ -55,6 +62,7 @@ import static java.lang.Integer.valueOf;
 @Join(path = "/", to = "/WEB-INF/jsp/login.jsf")
 @SessionScoped
 @Named("personneController")
+@RestController
 public class PersonneController implements IPersonneController, Serializable, IDocumentController {
 
     private String nom;
@@ -96,6 +104,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
     private Set<String> siteActivities;
     private Set<Document> pwcs = new HashSet<>();
     private Doc selectedSiteDoc;
+    public static String uploadDirectory = System.getProperty("user.dir")+"/uploads";
 
     @Autowired
     MemberRepository memberRepository;
@@ -120,7 +129,69 @@ public class PersonneController implements IPersonneController, Serializable, ID
        return people;
 
     }
+    @RequestMapping("/upload")
+    public void upload(Model model, @RequestParam("files") MultipartFile[] files, HttpServletResponse response) throws IOException {
+        StringBuilder fileNames = new StringBuilder();
+        for (MultipartFile file : files) {
+            System.out.println("######################### Upload File triggered #########################");
+            Doc dbDoc = new Doc();
 
+
+            if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
+                    .equals(CapabilityAcl.MANAGE)) {
+                System.out.println("Le GED ne supporte pas les ACL");
+            } else {
+                System.out.println("Le GED supporte les ACL");
+
+                System.out.println("The file's name is: "+file.getOriginalFilename());
+                BigInteger bi;
+                bi = BigInteger.valueOf(file.getSize());
+                HashMap<String, Object> newFileProps = new HashMap<String, Object>();
+                ContentStream contentStream = new ContentStreamImpl(file.getOriginalFilename(), bi,
+                        "application/octet-stream", new ByteArrayInputStream(file.getBytes()));
+
+
+                //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+                newFileProps.put(PropertyIds.NAME, file.getOriginalFilename());
+                newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+                List<String> permissions = new ArrayList<String>();
+                permissions.add("cmis:all");
+                String principal = nom;
+                Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                List<Ace> aceListIn = new ArrayList<Ace>();
+                aceListIn.add(aceIn);
+                Document testDoc = ((Folder) session.getObjectByPath("/Partagé/PostArion")).createDocument(newFileProps,
+                        contentStream,
+                        VersioningState.MAJOR);
+                testDoc.addAcl(aceListIn, AclPropagation.REPOSITORYDETERMINED);
+
+                OperationContext operationContext = new OperationContextImpl();
+                operationContext.setIncludeAcls(true);
+                testDoc = (Document) session.getObject(testDoc, operationContext);
+                System.out.println("l'id du document est: "+testDoc.getId());
+                testDoc.refresh();
+                dbDoc.setAlfrescoId(testDoc.getId());
+                dbDoc.setNom(file.getOriginalFilename());
+                dbDoc.setExpediteur(personne);
+                dbDoc.setAuthor(testDoc.getCreatedBy());
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+                dbDoc.setCreationDate(dtf.format(now));
+                dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable").toString());
+                dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType").toString());
+                dbDoc.setModificationDate(dtf.format(now));
+                dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel").toString());
+                docRepository.save(dbDoc);
+                System.out.println("Document added to Database !");
+
+
+
+            }
+
+        }
+        model.addAttribute("msg", "Successfully uploaded files "+fileNames.toString());
+        response.sendRedirect("docs-list.jsf");
+    }
 
     public List<Personne> getPersonnes() {
         System.out.println("Getting people");
@@ -371,6 +442,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         selectedSite.setActivities(act);
         siteRepository.save(selectedSite);
         siteActivities = selectedSite.getActivities();
+        System.out.println("Download done !");
     }
 
     public String doLogout()
@@ -611,97 +683,103 @@ public class PersonneController implements IPersonneController, Serializable, ID
         retrieveMembers();
     }
 
-    public void uploadForSite() {
-        System.out.println("######################### Upload File to site triggered #########################");
-        Doc dbDoc = new Doc();
+    @RequestMapping("/uploadforsite")
+    public void uploadforsite(Model model, @RequestParam("files") MultipartFile[] files, HttpServletResponse response) throws IOException {
+        StringBuilder fileNames = new StringBuilder();
+        for (MultipartFile file : files) {
+            System.out.println("######################### Upload File to site triggered #########################");
+            Doc dbDoc = new Doc();
 
 
-        if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
-                .equals(CapabilityAcl.MANAGE)) {
-            System.out.println("Le GED ne supporte pas les ACL");
-        } else {
-            System.out.println("Le GED supporte les ACL");
+            if (!session.getRepositoryInfo().getCapabilities().getAclCapability()
+                    .equals(CapabilityAcl.MANAGE)) {
+                System.out.println("Le GED ne supporte pas les ACL");
+            } else {
+                System.out.println("Le GED supporte les ACL");
 
-            System.out.println("The file's name is: " + file.getFileName());
-            BigInteger bi;
-            bi = BigInteger.valueOf(file.getSize());
-            HashMap<String, Object> newFileProps = new HashMap<String, Object>();
-            ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
-                    "application/octet-stream", new ByteArrayInputStream(file.getContents()));
+                System.out.println("The file's name is: " + file.getOriginalFilename());
+                BigInteger bi;
+                bi = BigInteger.valueOf(file.getSize());
+                HashMap<String, Object> newFileProps = new HashMap<String, Object>();
+                ContentStream contentStream = new ContentStreamImpl(file.getOriginalFilename(), bi,
+                        "application/octet-stream", new ByteArrayInputStream(file.getBytes()));
 
-            Map<String, Object> properties = new HashMap<String, Object>();
-            properties.put(PropertyIds.NAME, selectedSite.getNom());
-            properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
-            //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-            newFileProps.put(PropertyIds.NAME, file.getFileName());
-            newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
-            List<String> secondary = new ArrayList<>();
-            secondary.add("P:cm:titled");
-            newFileProps.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondary);
-            newFileProps.put("cm:title", selectedSite.getManager().getNom()+" is the site Manager");
-            newFileProps.put("cm:description", selectedSite.getNom());
+                Map<String, Object> properties = new HashMap<String, Object>();
+                properties.put(PropertyIds.NAME, selectedSite.getNom());
+                properties.put(PropertyIds.OBJECT_TYPE_ID, "cmis:folder");
+                //newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+                newFileProps.put(PropertyIds.NAME, file.getOriginalFilename());
+                newFileProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis:document");
+                List<String> secondary = new ArrayList<>();
+                secondary.add("P:cm:titled");
+                newFileProps.put(PropertyIds.SECONDARY_OBJECT_TYPE_IDS, secondary);
+                newFileProps.put("cm:title", selectedSite.getManager().getNom() + " is the site Manager");
+                newFileProps.put("cm:description", selectedSite.getNom());
 
-                Folder siteFolder = (Folder) session.getObjectByPath("/Partagé/Sites/"+selectedSite.getNom());
+                Folder siteFolder = (Folder) session.getObjectByPath("/Partagé/Sites/" + selectedSite.getNom());
                 siteFolderAcess(siteFolder);
                 Document testDoc = siteFolder.createDocument(newFileProps,
                         contentStream,
                         VersioningState.MAJOR);
 
-            for (Member m : siteMembers) {
-                Personne prs = personneRepository.findById(m.getUser().getId()).get();
-                System.out.println("Session properties: " + session.getSessionParameters().get(SessionParameter.USER));
-                System.out.println("Member in progress: " + prs.getNom());
-                List<String> permissions = new ArrayList<String>();
-                String role = m.getRole();
-                if (role.equals("Consumer")) {
-                    System.out.println("User is a consumer!");
-                    permissions.add("cmis:read");
-                } else if (role.equals("Contributor")) {
-                    System.out.println("User is a contributor!");
-                    permissions.add("cmis:read");
-                    permissions.add("cmis:write");
-                } else if (role.equals("Collaborator")) {
-                    System.out.println("User is a collaborator!");
-                    permissions.add("cmis:all");
+                for (Member m : siteMembers) {
+                    Personne prs = personneRepository.findById(m.getUser().getId()).get();
+                    System.out.println("Session properties: " + session.getSessionParameters().get(SessionParameter.USER));
+                    System.out.println("Member in progress: " + prs.getNom());
+                    List<String> permissions = new ArrayList<String>();
+                    String role = m.getRole();
+                    if (role.equals("Consumer")) {
+                        System.out.println("User is a consumer!");
+                        permissions.add("cmis:read");
+                    } else if (role.equals("Contributor")) {
+                        System.out.println("User is a contributor!");
+                        permissions.add("cmis:read");
+                        permissions.add("cmis:write");
+                    } else if (role.equals("Collaborator")) {
+                        System.out.println("User is a collaborator!");
+                        permissions.add("cmis:all");
+                    }
+                    String principal = m.getUser().getNom();
+                    Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
+                    List<Ace> aceListIn = new ArrayList<Ace>();
+                    aceListIn.add(aceIn);
+                    testDoc.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
+                    testDoc.refresh();
+                    System.out.println("Gave user " + prs.getNom() + " " + m.getRole() + " rights !");
+
+                    OperationContext operationContext = new OperationContextImpl();
+                    operationContext.setIncludeAcls(true);
+                    testDoc = (Document) session.getObject(testDoc, operationContext);
+                    System.out.println("l'id du document est: " + testDoc.getId());
+                    testDoc.refresh();
                 }
-                String principal = m.getUser().getNom();
-                Ace aceIn = session.getObjectFactory().createAce(principal, permissions);
-                List<Ace> aceListIn = new ArrayList<Ace>();
-                aceListIn.add(aceIn);
-                testDoc.applyAcl(aceListIn, null, AclPropagation.OBJECTONLY);
-                testDoc.refresh();
-                System.out.println("Gave user " + prs.getNom() + " "+m.getRole()+" rights !");
 
-                OperationContext operationContext = new OperationContextImpl();
-                operationContext.setIncludeAcls(true);
-                testDoc = (Document) session.getObject(testDoc, operationContext);
-                System.out.println("l'id du document est: " + testDoc.getId());
-                testDoc.refresh();
+                dbDoc.setAlfrescoId(testDoc.getId());
+                dbDoc.setNom(file.getOriginalFilename());
+                dbDoc.setExpediteur(personne);
+                dbDoc.setAuthor(testDoc.getCreatedBy());
+                dbDoc.setSite(selectedSite);
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+                LocalDateTime now = LocalDateTime.now();
+                dbDoc.setCreationDate(dtf.format(now));
+                dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable").toString());
+                dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType").toString());
+                dbDoc.setModificationDate(dtf.format(now));
+                dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel").toString());
+                docRepository.save(dbDoc);
+                System.out.println("Document added to Database !");
+                LocalDateTime date = LocalDateTime.now();
+                DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                String formattedDate = date.format(myFormatObj);
+                Set<String> act = selectedSite.getActivities();
+                act.add(personne.getNom() + " uploaded file " + testDoc.getName() + " at " + formattedDate);
+                selectedSite.setActivities(act);
+                siteRepository.save(selectedSite);
+                siteActivities = selectedSite.getActivities();
             }
-
-            dbDoc.setAlfrescoId(testDoc.getId());
-            dbDoc.setNom(file.getFileName());
-            dbDoc.setExpediteur(personne);
-            dbDoc.setAuthor(testDoc.getCreatedBy());
-            dbDoc.setSite(selectedSite);
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            dbDoc.setCreationDate(dtf.format(now));
-            dbDoc.setIsImmutable(testDoc.getPropertyValue("cmis:isImmutable").toString());
-            dbDoc.setMimeType(testDoc.getPropertyValue("cmis:contentStreamMimeType").toString());
-            dbDoc.setModificationDate(dtf.format(now));
-            dbDoc.setVersion(testDoc.getPropertyValue("cmis:versionLabel").toString());
-            docRepository.save(dbDoc);
-            System.out.println("Document added to Database !");
-            LocalDateTime date = LocalDateTime.now();
-            DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-            String formattedDate = date.format(myFormatObj);
-            Set<String> act=  selectedSite.getActivities();
-            act.add(personne.getNom()+" uploaded file "+testDoc.getName()+" at "+formattedDate);
-            selectedSite.setActivities(act);
-            siteRepository.save(selectedSite);
-            siteActivities = selectedSite.getActivities();
         }
+        model.addAttribute("msg", "Successfully uploaded files "+fileNames.toString());
+        response.sendRedirect("site-details.jsf");
     }
 
     public void siteFolderAcess(Folder siteFolder)
@@ -752,6 +830,7 @@ public class PersonneController implements IPersonneController, Serializable, ID
         allSites=mySites;
         return "all-sites?faces-redirect=true";
     }
+
     @Transactional
     public String deleteFromSite() {
         System.out.println("######################### Delete function started #########################");
@@ -817,36 +896,40 @@ public class PersonneController implements IPersonneController, Serializable, ID
         }else
             System.out.println("Versioning not support by your ECM");
     }
-    public void updateFile()
-    {
-        System.out.println("######################### Update File Function #########################");
-        System.out.println("Files to update: "+pwcs.size());
-        for (Document doc: pwcs)
-        {
 
-            String fileName = doc.getName().replace("((Copie de Travail))","");
-            System.out.println("Updating file: "+fileName+" "+doc.getName());
-            if(fileName.equals(fileName))
-            {
-               
-                BigInteger bi;
-                bi = BigInteger.valueOf(file.getSize());
-                ContentStream contentStream = new ContentStreamImpl(file.getFileName(), bi,
-                        "application/octet-stream", new ByteArrayInputStream(file.getContents()));
-                ObjectId updateDocId = doc.checkIn(false,null, contentStream,"minor change");
-                Document updateDocument = (Document)session.getObject(updateDocId);
-                System.out.println("The new version is: "+updateDocument.getVersionLabel());
-                System.out.println("doc name: "+updateDocument.getName());
-                Doc dbDoc =docRepository.getDocByName(updateDocument.getName());
-                dbDoc.setAlfrescoId(updateDocument.getId());
-                dbDoc.setVersion(updateDocument.getVersionLabel());
-                docRepository.save(dbDoc);
-                System.out.println("Updated doc in database");
-                siteDocuments = selectedSite.getDocuments();
+    @RequestMapping("/update")
+    public void update(Model model, @RequestParam("files") MultipartFile[] files, HttpServletResponse response) throws IOException {
+        StringBuilder fileNames = new StringBuilder();
+        for (MultipartFile file : files) {
+            System.out.println("######################### Update File Function #########################");
+            System.out.println("Files to update: " + pwcs.size());
+            for (Document doc : pwcs) {
+
+                String fileName = doc.getName().replace("((Copie de Travail))", "");
+                System.out.println("Updating file: " + fileName + " " + doc.getName());
+                if (fileName.equals(fileName)) {
+
+                    BigInteger bi;
+                    bi = BigInteger.valueOf(file.getSize());
+                    ContentStream contentStream = new ContentStreamImpl(file.getOriginalFilename(), bi,
+                            "application/octet-stream", new ByteArrayInputStream(file.getBytes()));
+                    ObjectId updateDocId = doc.checkIn(false, null, contentStream, "minor change");
+                    Document updateDocument = (Document) session.getObject(updateDocId);
+                    System.out.println("The new version is: " + updateDocument.getVersionLabel());
+                    System.out.println("doc name: " + updateDocument.getName());
+                    Doc dbDoc = docRepository.getDocByName(updateDocument.getName());
+                    dbDoc.setAlfrescoId(updateDocument.getId());
+                    dbDoc.setVersion(updateDocument.getVersionLabel());
+                    docRepository.save(dbDoc);
+                    System.out.println("Updated doc in database");
+                    siteDocuments = selectedSite.getDocuments();
+                }
+                pwcs.remove(doc);
+                System.out.println("removed file from pwcs!");
             }
-            pwcs.remove(doc);
-            System.out.println("removed file from pwcs!");
         }
+        model.addAttribute("msg", "Successfully uploaded files "+fileNames.toString());
+        response.sendRedirect("site-details.jsf");
     }
 
     public String getNom() {

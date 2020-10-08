@@ -79,10 +79,8 @@
 			<h:form enctype="multipart/form-data" >
 			<div class="card mb-3">
 				<div class="card-header">
-					<h4>Users :</h4>
-					<p:fileUpload value="#{personneController.file}" mode="simple" skinSimple="true" accept=".txt,.pdf,.tsv"/>
-					<p:commandButton value="Submit" ajax="false" action="#{personneController.uploadForSite}"
-									 disabled="false" />
+					<h4>Users </h4>
+
 				</div>
 
 				<div class="card-body">
@@ -137,6 +135,10 @@
 				</div>
 			</div>
 			</h:form>
+			<form action="/upload" method="post" enctype="multipart/form-data">
+				<input type="file" name="files"/>
+				<input type="submit" value="Upload Files"></input>
+			</form>
 		</div>
 		</div>
 
